@@ -31,6 +31,8 @@ Data flow:
 
 Current modes are only *Agrupación por Área*, *Bipartito en columnas* (default columns in `BIPARTITO_PREDETERMINADO`: Estados left, Pueblo Mágico right; the shorter column is sorted by degree, the other by neighbor position), *Arranque centralizado* and *Red geográfica*; other modes listed in the brief are pending, not missing by accident.
 
+**Analysis tabs** (*Matriz y grados*, *Interpretación*) are not network modes: they are registered in `VISTAS` and `VISTAS_IMPL` (section 8B), render HTML into `#vista`, and `state.vista` (null = network mode) selects them. They compute from the full model `M` (ignoring filters), cached in `M.analisis`; they don't read the precomputed CSVs in `data/`. The interpretation text is generated from computed values, so don't hardcode figures or node names in it. A membership link is one whose weight text is exactly `50` (no unit) between an Estado and a non-Estado (`esPertenencia`); `50 km` is a real route.
+
 ## Data (`data/`)
 
 - `Points.csv` and `Links.csv` are the live inputs. `Links.csv` has an empty first row (`,,`) that acts as the header. `Celaya` and `León` are nodes with category `Ciudad` (appended at the end so category colors, assigned by first appearance, don't shift). Don't "fix" names in the parser — the design is to warn, and corrections belong in the CSV.

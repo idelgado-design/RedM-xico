@@ -28,6 +28,7 @@ Nota: las matrices y los grados se calcularon con una normalización de nombres 
 - Un solo archivo, funciona en el navegador sin servidor. Carga D3 v7.8.5 y p5.js v1.9.0 desde cdnjs (requiere internet la primera vez).
 - Interfaz en español. El usuario carga los CSV con los botones **Cargar nodos** y **Cargar conexiones**.
 - **Librería (opción c):** D3 lee CSV, calcula escalas y posiciones; p5.js (modo instancia) dibuja en canvas. Zoom/paneo con `d3.zoom`.
+- **Pestañas de análisis:** *Matriz y grados* (matriz binaria o en km, tabla de grados con búsqueda, orden, intermediación y descarga CSV) e *Interpretación* (descripción, medidas cuantitativas, lectura cualitativa y limitaciones). Se calculan en el navegador a partir de los CSV cargados.
 - **Modos (cuatro):**
   - *Agrupación por Área*: `d3.pack` + fuerzas, contorno convexo suavizado por categoría.
   - *Bipartito en columnas*: dos columnas elegibles, curvas bezier, orden por baricentro. Por defecto Estados (izquierda) y Pueblo Mágico (derecha).

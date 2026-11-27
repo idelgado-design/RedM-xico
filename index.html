@@ -77,6 +77,44 @@
   #tip{ position: fixed; z-index: 20; pointer-events: none; background: rgba(28,40,32,.96); color: #f4f3ef; padding: 8px 11px; border-radius: 8px; font-size: 12.5px; line-height: 1.45; max-width: 280px; display: none; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
   #tip b{ font-weight: 800; }
   #tip .k{ color: #a9c9b4; }
+
+  /* Vistas de análisis */
+  #vista{ display: none; position: absolute; inset: 0; overflow: auto; background: var(--fondo); z-index: 6; }
+  body.en-vista #vista{ display: block; }
+  body.en-vista #barra, body.en-vista #btn-panel{ display: none; }
+  .hoja{ max-width: 860px; margin: 0 auto; padding: 20px 24px 60px; line-height: 1.55; }
+  .hoja.ancha{ max-width: none; }
+  .hoja h2{ font-size: 20px; color: var(--acento-oscuro); margin: 26px 0 8px; }
+  .hoja h3{ font-size: 15px; margin: 20px 0 6px; }
+  .hoja li{ margin-bottom: 4px; }
+  .hoja li.alerta{ background: #fbf4e3; border-left: 3px solid #d9a441; padding: 6px 10px; list-style: none; }
+  .controles{ display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; font-size: 13px; }
+  .controles select, .controles input{ border: 1px solid var(--borde); border-radius: 6px; padding: 5px 8px; background: #fff; color: var(--texto); }
+  .caja-scroll{ overflow: auto; max-height: 70vh; background: #fff; border: 1px solid var(--borde); border-radius: 8px; width: fit-content; max-width: 100%; }
+  table.matriz{ border-collapse: separate; border-spacing: 0; font-size: 10px; }
+  table.matriz th, table.matriz td{ border-right: 1px solid #eceae3; border-bottom: 1px solid #eceae3; }
+  table.matriz td{ min-width: 26px; height: 20px; text-align: center; padding: 0 1px; }
+  table.matriz td.diag{ background: #eceae3; }
+  table.matriz td.oscuro{ color: #fff; }
+  table.matriz thead th{ position: sticky; top: 0; background: var(--panel); z-index: 2; vertical-align: bottom; padding: 4px 0; }
+  table.matriz th.col span{ writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; font-weight: 700; }
+  table.matriz tbody th{ position: sticky; left: 0; background: var(--panel); z-index: 1; text-align: left; white-space: nowrap; padding: 0 8px; }
+  table.matriz tbody th i{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+  table.matriz thead th.esquina{ left: 0; z-index: 3; }
+  table.datos{ border-collapse: collapse; font-size: 13px; background: #fff; margin: 6px 0 12px; }
+  table.datos th, table.datos td{ padding: 5px 12px; border-bottom: 1px solid var(--borde); text-align: right; }
+  table.datos th:first-child, table.datos td:first-child{ text-align: left; }
+  table.grados{ margin: 0; }
+  table.grados th:nth-child(2), table.grados td:nth-child(2), table.grados th:nth-child(3), table.grados td:nth-child(3){ text-align: left; }
+  table.grados thead th{ position: sticky; top: 0; background: var(--panel); }
+  th.orden{ cursor: pointer; user-select: none; }
+  .cifras{ display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .cifras div{ background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; padding: 10px 12px; }
+  .cifras b{ display: block; font-size: 22px; color: var(--acento-oscuro); }
+  .cifras span{ font-size: 12px; color: var(--suave); }
+  .barras{ display: grid; grid-template-columns: max-content 1fr max-content; gap: 5px 10px; align-items: center; font-size: 13px; }
+  .barras .bp{ height: 12px; }
+  .barras .bp i{ display: block; height: 100%; background: var(--acento); border-radius: 0 4px 4px 0; }
 </style>
 </head>
 <body>
@@ -122,6 +160,7 @@
     </div>
     <div id="sin-nodos">No hay nodos visibles con los filtros actuales.</div>
     <div id="error-modo"></div>
+    <div id="vista"></div>
     <div id="vacio"><div class="tarjeta">
       <h2>Red de Entidades Federativas</h2>
       <p>Carga los dos archivos CSV para comenzar.</p>
@@ -164,6 +203,12 @@ const MODOS = [
   { id: 'arranque',  nombre: 'Arranque centralizado' },
   { id: 'geo',       nombre: 'Red geográfica' }
 ];
+const VISTAS = [                                              // pestañas de análisis (no son modos de red)
+  { id: 'matriz',         nombre: 'Matriz y grados' },
+  { id: 'interpretacion', nombre: 'Interpretación' }
+];
+const CAT_ESTADOS = 'Estados', CAT_PUEBLOS = 'Pueblo Mágico';  // AJUSTABLE: nombres de categoría que usa el análisis
+const PESO_NOMINAL = 50;                                       // AJUSTABLE: km que marcan "pertenece a este Estado"
 const BIPARTITO_PREDETERMINADO = { izquierda: 'Estados', derecha: 'Pueblo Mágico' }; // AJUSTABLE: columnas iniciales del modo bipartito
 const GEO_ESCALA_RADIO = 0.65;                                 // AJUSTABLE: tamaño de los nodos en la red geográfica (respecto a los demás modos)
 const GEO_ESCALA_GROSOR = 0.45;                                // AJUSTABLE: grosor de las conexiones en la red geográfica
@@ -190,6 +235,9 @@ const state = {
   enlaces: null,         // CSV de conexiones leído
   coords: null,          // coordenadas: { archivo, exactas: Map, aprox: Map } de nombre → {lat, lon}
   modo: 'area',
+  vista: null,           // pestaña de análisis abierta (null = se ve el modo de red)
+  matValor: 'binaria', matOrden: 'categoria',
+  gradoCol: 'grado', gradoDir: -1, gradoBusca: '', gradoCat: '',
   sel: null,             // id del nodo seleccionado
   hover: null,           // {tipo:'nodo'|'enlace', ...}
   ocultas: new Set(),    // categorías ocultas
@@ -952,10 +1000,13 @@ function dibujarFrame(p) {
 // Pinta las pestañas de modos.
 function renderPestanas() {
   const c = document.getElementById('pestanas');
-  c.innerHTML = MODOS.map(m => `<button class="pestana${m.id === state.modo ? ' activa' : ''}" data-modo="${m.id}">${esc(m.nombre)}</button>`).join('');
-  c.querySelectorAll('button').forEach(b => b.onclick = () => {
-    state.modo = b.dataset.modo; renderPestanas(); renderModoBarra(); actualizarEscena(true);
+  const boton = (attr, id, nombre, activa) => `<button class="pestana${activa ? ' activa' : ''}" ${attr}="${id}">${esc(nombre)}</button>`;
+  c.innerHTML = MODOS.map(m => boton('data-modo', m.id, m.nombre, !state.vista && m.id === state.modo)).join('') +
+    VISTAS.map(v => boton('data-vista', v.id, v.nombre, v.id === state.vista)).join('');
+  c.querySelectorAll('[data-modo]').forEach(b => b.onclick = () => {
+    state.vista = null; state.modo = b.dataset.modo; renderPestanas(); renderVista(); renderModoBarra(); actualizarEscena(true);
   });
+  c.querySelectorAll('[data-vista]').forEach(b => b.onclick = () => { state.vista = b.dataset.vista; renderPestanas(); renderVista(); });
 }
 
 // Pinta los controles propios del modo activo (hubs, columnas) y el chip de avisos.
@@ -1125,7 +1176,9 @@ function reconstruir() {
   state.bipA = M.cats.includes(pref.izquierda) ? pref.izquierda : M.cats.slice().sort((a, b) => porCat(b) - porCat(a))[0];
   state.bipB = (pref.derecha !== state.bipA && M.cats.includes(pref.derecha)) ? pref.derecha : (M.cats.find(c => c !== state.bipA) || '*');
   renderEstadoArchivos(); renderLeyenda(); renderAvisos(); renderModoBarra(); renderPestanas();
+  state.gradoCat = ''; state.gradoBusca = '';
   actualizarEscena(true);
+  renderVista();
 }
 
 // Conecta botones, casillas y el panel colapsable.
@@ -1140,6 +1193,357 @@ function conectarInterfaz() {
   document.getElementById('z-menos').onclick = () => state.zoomSel && state.zoomSel.transition().duration(200).call(state.zoomB.scaleBy, 1 / 1.4);
   document.getElementById('z-ajustar').onclick = () => ajustarVista(true);
   renderCapas(); renderPestanas(); renderEstadoArchivos();
+}
+
+// ============================================================
+// 8B VISTAS DE ANÁLISIS (matriz, tabla de grados e interpretación)
+// ============================================================
+// Usan siempre la red completa (no les afectan los filtros ni las capas).
+
+const num = (v, d = 0) => v.toLocaleString('es-MX', { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (a, b, d = 1) => num(b ? 100 * a / b : 0, d) + ' %';
+const enumerar = arr => arr.length > 1 ? arr.slice(0, -1).join(', ') + ' y ' + arr[arr.length - 1] : (arr[0] || '—');
+
+// El valor nominal viene sin unidad ("50"); una distancia real de 50 km se escribe "50 km".
+const esValorNominal = l => l.wTxt === String(PESO_NOMINAL);
+
+// Un enlace de pertenencia une un nodo con su Estado y trae el valor nominal (no es una distancia medida).
+function esPertenencia(l) {
+  return esValorNominal(l) && (l.s.cat === CAT_ESTADOS) !== (l.t.cat === CAT_ESTADOS);
+}
+
+// Distancias en saltos desde un nodo (búsqueda en anchura).
+function saltosDesde(origen, vecinos) {
+  const dist = new Array(vecinos.length).fill(-1), cola = [origen];
+  dist[origen] = 0;
+  for (let i = 0; i < cola.length; i++) {
+    const u = cola[i];
+    for (const v of vecinos[u]) if (dist[v] < 0) { dist[v] = dist[u] + 1; cola.push(v); }
+  }
+  return dist;
+}
+
+// Intermediación (algoritmo de Brandes): fracción de caminos mínimos que pasan por cada nodo, de 0 a 1.
+function intermediacion(vecinos) {
+  const n = vecinos.length, cb = new Array(n).fill(0);
+  for (let s = 0; s < n; s++) {
+    const orden = [s], dist = new Array(n).fill(-1), sigma = new Array(n).fill(0), previos = vecinos.map(() => []);
+    dist[s] = 0; sigma[s] = 1;
+    for (let i = 0; i < orden.length; i++) {
+      const u = orden[i];
+      for (const v of vecinos[u]) {
+        if (dist[v] < 0) { dist[v] = dist[u] + 1; orden.push(v); }
+        if (dist[v] === dist[u] + 1) { sigma[v] += sigma[u]; previos[v].push(u); }
+      }
+    }
+    const delta = new Array(n).fill(0);
+    for (let i = orden.length - 1; i > 0; i--) {
+      const w = orden[i];
+      for (const u of previos[w]) delta[u] += sigma[u] / sigma[w] * (1 + delta[w]);
+      cb[w] += delta[w];
+    }
+  }
+  const norm = (n - 1) * (n - 2);              // cada par se contó dos veces
+  return cb.map(v => norm > 0 ? v / norm : 0);
+}
+
+// Calcula una sola vez todas las medidas de la red.
+function analizar() {
+  if (M.analisis) return M.analisis;
+  const N = M.nodes.length, E = M.links.length;
+  const vecinos = M.nodes.map(n => [...n.nb].map(id => M.byId.get(id).idx));
+  const bc = intermediacion(vecinos);
+
+  const filas = M.nodes.map(n => ({ n, nombre: n.name, cat: n.cat, grado: n.deg, km: 0, kmRutas: 0, bc: bc[n.idx] }));
+  for (const l of M.links) for (const x of [l.s, l.t]) {
+    filas[x.idx].km += l.w || 0;
+    if (!esPertenencia(l)) filas[x.idx].kmRutas += l.w || 0;
+  }
+
+  // Componentes conectados.
+  const visto = new Array(N).fill(false), componentes = [];
+  for (let i = 0; i < N; i++) {
+    if (visto[i]) continue;
+    const comp = saltosDesde(i, vecinos).map((d, j) => d >= 0 ? j : -1).filter(j => j >= 0);
+    comp.forEach(j => visto[j] = true);
+    componentes.push(comp);
+  }
+  componentes.sort((a, b) => b.length - a.length);
+
+  // Diámetro y camino medio del componente mayor.
+  let diametro = 0, suma = 0, pares = 0, extremos = null;
+  for (const u of componentes[0] || []) {
+    const d = saltosDesde(u, vecinos);
+    for (const v of componentes[0]) {
+      if (u === v) continue;
+      suma += d[v]; pares++;
+      if (d[v] > diametro) { diametro = d[v]; extremos = [M.nodes[u].name, M.nodes[v].name]; }
+    }
+  }
+
+  // Agrupamiento medio y número de triángulos.
+  let sumaC = 0, triples = 0;
+  M.nodes.forEach(n => {
+    const v = [...n.nb];
+    if (v.length < 2) return;
+    let t = 0;
+    for (let i = 0; i < v.length; i++) for (let j = i + 1; j < v.length; j++) if (M.byId.get(v[i]).nb.has(v[j])) t++;
+    triples += t; sumaC += t / (v.length * (v.length - 1) / 2);
+  });
+
+  const rutas = M.links.filter(l => !esPertenencia(l) && l.w != null);
+  const grados = filas.map(f => f.grado);
+  const porGrado = filas.slice().sort((a, b) => b.grado - a.grado || a.nombre.localeCompare(b.nombre, 'es'));
+  const porBc = filas.slice().sort((a, b) => b.bc - a.bc);
+
+  const porCat = M.cats.map(cat => {
+    const f = filas.filter(x => x.cat === cat);
+    return { cat, n: f.length, media: d3.mean(f, x => x.grado), max: d3.max(f, x => x.grado), suma: d3.sum(f, x => x.grado) };
+  });
+  const parejas = d3.rollups(M.links, v => v.length, l => [l.s.cat, l.t.cat].sort((a, b) => M.cats.indexOf(a) - M.cats.indexOf(b)).join(' ↔ '))
+    .sort((a, b) => b[1] - a[1]);
+
+  // Pueblos Mágicos que cada Estado tiene conectados.
+  const pueblos = filas.filter(f => f.cat === CAT_ESTADOS)
+    .map(f => ({ nombre: f.nombre, n: [...f.n.nb].filter(id => M.byId.get(id).cat === CAT_PUEBLOS).length }))
+    .sort((a, b) => b.n - a.n || a.nombre.localeCompare(b.nombre, 'es'));
+
+  // Enlaces entre dos Estados con el valor nominal: probablemente un pueblo homónimo de un Estado.
+  const sospechosos = M.links.filter(l => esValorNominal(l) && l.s.cat === CAT_ESTADOS && l.t.cat === CAT_ESTADOS);
+
+  M.analisis = {
+    N, E, filas, porGrado, porBc, porCat, parejas, pueblos, sospechosos, componentes, rutas,
+    densidad: N > 1 ? 2 * E / (N * (N - 1)) : 0,
+    gradoMedio: N ? 2 * E / N : 0, gradoMediana: d3.median(grados) || 0,
+    hojas: grados.filter(g => g === 1).length, aislados: grados.filter(g => g === 0).length,
+    distribucion: [[0, 0, '0'], [1, 1, '1'], [2, 2, '2'], [3, 5, '3–5'], [6, 10, '6–10'], [11, 15, '11–15'], [16, Infinity, '16 o más']]
+      .map(([a, b, t]) => ({ t, n: grados.filter(g => g >= a && g <= b).length })),
+    top10: d3.sum(porGrado.slice(0, 10), f => f.grado),
+    diametro, extremos, caminoMedio: pares ? suma / pares : 0,
+    agrupamiento: N ? sumaC / N : 0, hayTriangulos: triples > 0
+  };
+  return M.analisis;
+}
+
+// Tabla HTML sencilla; la primera columna se alinea a la izquierda.
+function tablaSimple(cabeceras, filas) {
+  return `<table class="datos"><thead><tr>${cabeceras.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${filas.map(f => `<tr>${f.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+
+// Barras horizontales para comparar valores.
+function barras(datos) {
+  const max = d3.max(datos, d => d.v) || 1;
+  return `<div class="barras">${datos.map(d => `<span class="bn">${esc(d.t)}</span><span class="bp"><i style="width:${100 * d.v / max}%"></i></span><span class="bv">${esc(d.txt != null ? d.txt : num(d.v))}</span>`).join('')}</div>`;
+}
+
+// Genera y descarga un CSV (con BOM para que Excel respete los acentos).
+function descargarCSV(nombre, filas) {
+  const celda = v => /[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v);
+  const url = URL.createObjectURL(new Blob(['﻿' + filas.map(f => f.map(celda).join(',')).join('\n')], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = nombre; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ---------- Matriz y tabla de grados ----------
+
+function ordenMatriz() {
+  const nodos = M.nodes.slice();
+  if (state.matOrden === 'categoria') nodos.sort((a, b) => M.cats.indexOf(a.cat) - M.cats.indexOf(b.cat) || a.name.localeCompare(b.name, 'es'));
+  if (state.matOrden === 'grado') nodos.sort((a, b) => b.deg - a.deg || a.name.localeCompare(b.name, 'es'));
+  if (state.matOrden === 'nombre') nodos.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  return nodos;
+}
+
+// Mapa "i|j" → conexión, válido en ambos sentidos.
+function indiceEnlaces() {
+  const m = new Map();
+  M.links.forEach(l => { m.set(l.s.idx + '|' + l.t.idx, l); m.set(l.t.idx + '|' + l.s.idx, l); });
+  return m;
+}
+
+function valorCelda(l, enKm) { return !l ? 0 : (enKm ? (l.w != null ? l.w : 0) : 1); }
+
+function pintarMatriz() {
+  const nodos = ordenMatriz(), idx = indiceEnlaces(), enKm = state.matValor === 'km';
+  const maxW = d3.max(M.links, l => l.w) || 1;
+  let h = '<table class="matriz"><thead><tr><th class="esquina">Nodo</th>' +
+    nodos.map(n => `<th class="col"><span>${esc(n.name)}</span></th>`).join('') + '</tr></thead><tbody>';
+  for (const a of nodos) {
+    h += `<tr><th><i style="background:${M.colores[a.cat]}"></i>${esc(a.name)}</th>`;
+    for (const b of nodos) {
+      const l = idx.get(a.idx + '|' + b.idx);
+      if (!l) { h += a === b ? '<td class="diag"></td>' : '<td></td>'; continue; }
+      const v = valorCelda(l, enKm);
+      const alfa = enKm ? 0.18 + 0.82 * Math.sqrt(v / maxW) : 1;
+      h += `<td class="si${alfa > 0.55 ? ' oscuro' : ''}" style="background:rgba(15,77,46,${alfa.toFixed(2)})" title="${esc(a.name)} — ${esc(b.name)}${l.w != null ? ': ' + esc(l.wTxt) : ''}">${v}</td>`;
+    }
+    h += '</tr>';
+  }
+  document.getElementById('caja-matriz').innerHTML = h + '</tbody></table>';
+}
+
+const COLUMNAS_GRADOS = [
+  ['nombre', 'Nodo'], ['cat', 'Tipo'], ['grado', 'Grado'], ['km', 'Suma km'], ['kmRutas', 'Km sin valores nominales'], ['bc', 'Intermediación']
+];
+
+function filasGrados() {
+  const q = normalizar(state.gradoBusca), col = state.gradoCol, dir = state.gradoDir;
+  return analizar().filas
+    .filter(f => (!state.gradoCat || f.cat === state.gradoCat) && (!q || normalizar(f.nombre).includes(q)))
+    .sort((a, b) => dir * (typeof a[col] === 'string' ? a[col].localeCompare(b[col], 'es') : a[col] - b[col]) || b.grado - a.grado || a.nombre.localeCompare(b.nombre, 'es'));
+}
+
+function pintarGrados() {
+  const filas = filasGrados();
+  document.getElementById('caja-grados').innerHTML = '<table class="datos grados"><thead><tr><th>#</th>' +
+    COLUMNAS_GRADOS.map(([id, t]) => `<th class="orden" data-col="${id}">${t}${state.gradoCol === id ? (state.gradoDir > 0 ? ' ▲' : ' ▼') : ''}</th>`).join('') +
+    '</tr></thead><tbody>' +
+    filas.map((f, i) => `<tr><td>${i + 1}</td><td>${esc(f.nombre)}</td><td>${esc(f.cat)}</td><td>${f.grado}</td><td>${num(f.km)}</td><td>${num(f.kmRutas)}</td><td>${num(f.bc, 3)}</td></tr>`).join('') +
+    '</tbody></table>';
+  document.getElementById('n-grados').textContent = `${filas.length} nodo(s)`;
+  document.querySelectorAll('#caja-grados th.orden').forEach(th => th.onclick = () => {
+    const col = th.dataset.col;
+    state.gradoDir = state.gradoCol === col ? -state.gradoDir : (col === 'nombre' || col === 'cat' ? 1 : -1);
+    state.gradoCol = col; pintarGrados();
+  });
+}
+
+function pintarVistaMatriz(el) {
+  const opt = (v, sel, t) => `<option value="${esc(v)}"${v === sel ? ' selected' : ''}>${esc(t)}</option>`;
+  el.innerHTML = `<div class="hoja ancha">
+    <h2>Matriz de adyacencia (${M.nodes.length} × ${M.nodes.length})</h2>
+    <p>Cada celda coloreada indica una conexión. La matriz es simétrica (la red se trata como no dirigida) y las celdas vacías valen 0. Pasa el cursor sobre una celda para ver el par.</p>
+    <div class="controles">
+      <label>Valor <select id="mat-valor">${opt('binaria', state.matValor, 'Binaria (0/1)')}${opt('km', state.matValor, 'Ponderada (km)')}</select></label>
+      <label>Orden <select id="mat-orden">${opt('categoria', state.matOrden, 'Por categoría')}${opt('grado', state.matOrden, 'Por grado')}${opt('nombre', state.matOrden, 'Alfabético')}${opt('archivo', state.matOrden, 'Como en el archivo')}</select></label>
+      <button class="btn" id="mat-csv">Descargar matriz (CSV)</button>
+    </div>
+    <div class="caja-scroll" id="caja-matriz"></div>
+    <h2>Tabla de grados</h2>
+    <p><b>Grado</b>: número de conexiones. <b>Suma km</b>: suma de los pesos de esas conexiones, incluidos los ${PESO_NOMINAL} km nominales de pertenencia a un Estado. <b>Intermediación</b> (0 a 1): qué tanto el nodo está en los caminos más cortos entre otros, contando saltos y no km. Haz clic en un encabezado para ordenar.</p>
+    <div class="controles">
+      <label>Buscar <input type="search" id="gr-busca" value="${esc(state.gradoBusca)}" placeholder="Nombre del nodo"></label>
+      <label>Tipo <select id="gr-cat">${opt('', state.gradoCat, 'Todos')}${M.cats.map(c => opt(c, state.gradoCat, c)).join('')}</select></label>
+      <span class="nada" id="n-grados"></span>
+      <button class="btn" id="gr-csv">Descargar tabla (CSV)</button>
+    </div>
+    <div class="caja-scroll" id="caja-grados"></div>
+  </div>`;
+  const $ = id => document.getElementById(id);
+  $('mat-valor').onchange = ev => { state.matValor = ev.target.value; pintarMatriz(); };
+  $('mat-orden').onchange = ev => { state.matOrden = ev.target.value; pintarMatriz(); };
+  $('mat-csv').onclick = () => {
+    const nodos = ordenMatriz(), idx = indiceEnlaces(), enKm = state.matValor === 'km';
+    descargarCSV(enKm ? 'matriz_ponderada_km.csv' : 'matriz_adyacencia.csv',
+      [['Nodo', ...nodos.map(n => n.name)], ...nodos.map(a => [a.name, ...nodos.map(b => valorCelda(idx.get(a.idx + '|' + b.idx), enKm))])]);
+  };
+  $('gr-busca').oninput = ev => { state.gradoBusca = ev.target.value; pintarGrados(); };
+  $('gr-cat').onchange = ev => { state.gradoCat = ev.target.value; pintarGrados(); };
+  $('gr-csv').onclick = () => descargarCSV('grados_por_nodo.csv',
+    [['Nodo', 'Tipo', 'Grado', 'Suma_km', 'Km_sin_valores_nominales', 'Intermediacion'], ...filasGrados().map(f => [f.nombre, f.cat, f.grado, f.km, f.kmRutas, f.bc.toFixed(5)])]);
+  pintarMatriz(); pintarGrados();
+}
+
+// ---------- Descripción e interpretación ----------
+
+function pintarVistaInterpretacion(el) {
+  const a = analizar();
+  const top = a.porGrado.slice(0, 10), puente = a.porBc.slice(0, 5);
+  const mayor = a.componentes[0] ? a.componentes[0].length : 0;
+  const conexa = a.componentes.length === 1;
+  const estadosTop = a.porGrado.slice(0, 5).filter(f => f.cat === CAT_ESTADOS).length;
+  const conPueblos = a.pueblos.filter(p => p.n > 0), sinPueblos = a.pueblos.filter(p => !p.n);
+  const rutasOrden = a.rutas.slice().sort((x, y) => y.w - x.w);
+  const par = l => `${l.o} – ${l.d} (${num(l.w)} km)`;
+  const nominales = a.E - M.links.filter(l => !esPertenencia(l)).length;
+  const hayPueblos = M.cats.includes(CAT_PUEBLOS) && conPueblos.length > 0;
+
+  let h = `<div class="hoja">
+  <h2>Descripción de la red</h2>
+  <p>La red representa entidades geográficas de México. Tiene <b>${num(a.N)} nodos</b> (${esc(enumerar(a.porCat.map(c => `${num(c.n)} de tipo «${c.cat}»`)))}) y <b>${num(a.E)} conexiones</b> no dirigidas, ponderadas con un valor en kilómetros.</p>
+  <p>Hay dos clases de conexión. <b>${num(nominales)}</b> son de <b>pertenencia</b>: unen un nodo con su Estado y llevan un valor fijo de ${PESO_NOMINAL} km que no mide una distancia. Las otras <b>${num(a.E - nominales)}</b> son <b>rutas</b> entre entidades. La clasificación sale de los datos: es de pertenencia toda conexión con el valor «${PESO_NOMINAL}» sin unidad entre un Estado y un nodo que no es Estado.</p>
+
+  <h2>Interpretación cuantitativa</h2>
+  <div class="cifras">${[
+    ['Nodos', num(a.N)], ['Conexiones', num(a.E)], ['Densidad', pct(a.densidad, 1, 2)], ['Grado medio', num(a.gradoMedio, 2)],
+    ['Grado mediano', num(a.gradoMediana, 1)], ['Componentes', num(a.componentes.length)], ['Diámetro (saltos)', num(a.diametro)],
+    ['Camino medio (saltos)', num(a.caminoMedio, 2)], ['Agrupamiento medio', num(a.agrupamiento, 3)]
+  ].map(([t, v]) => `<div><b>${v}</b><span>${t}</span></div>`).join('')}</div>
+
+  <h3>Cohesión y alcance</h3>
+  <ul>
+    <li>Existe el <b>${pct(a.densidad, 1, 2)}</b> de todas las conexiones posibles entre pares de nodos.</li>
+    <li>${conexa ? 'La red es <b>conexa</b>: desde cualquier nodo se puede llegar a todos los demás.' : `La red tiene <b>${num(a.componentes.length)} componentes</b>; el mayor reúne ${num(mayor)} nodos (${pct(mayor, a.N)}).`}</li>
+    <li>${conexa ? 'En promedio' : 'En el componente mayor, en promedio'}, dos nodos están a <b>${num(a.caminoMedio, 2)} saltos</b>. Los más alejados están a ${num(a.diametro)}${a.extremos ? ` (por ejemplo, ${esc(a.extremos.join(' y '))})` : ''}.</li>
+  </ul>
+
+  <h3>Distribución del grado</h3>
+  ${barras(a.distribucion.filter(d => d.n > 0).map(d => ({ t: 'Grado ' + d.t, v: d.n, txt: `${num(d.n)} (${pct(d.n, a.N)})` })))}
+  <p><b>${num(a.hojas)} nodos (${pct(a.hojas, a.N)})</b> tienen una sola conexión. Los 10 nodos de mayor grado reúnen el ${pct(a.top10, 2 * a.E)} de la suma de grados.</p>
+
+  <h3>Por categoría</h3>
+  ${tablaSimple(['Categoría', 'Nodos', 'Grado medio', 'Grado máximo'], a.porCat.map(c => [c.cat, num(c.n), num(c.media, 2), num(c.max)]))}
+  ${tablaSimple(['Tipo de conexión', 'Cantidad', 'Porcentaje'], a.parejas.map(([t, n]) => [t, num(n), pct(n, a.E)]))}
+
+  <h3>Nodos con más conexiones</h3>
+  ${barras(top.map(f => ({ t: f.nombre, v: f.grado })))}
+  <h3>Nodos con mayor intermediación</h3>
+  ${barras(puente.map(f => ({ t: f.nombre, v: f.bc, txt: num(f.bc, 3) })))}`;
+
+  if (hayPueblos) h += `
+  <h3>Pueblos Mágicos conectados por Estado</h3>
+  <p>Mediana: ${num(d3.median(a.pueblos, p => p.n), 1)} por Estado.${sinPueblos.length ? ` Sin Pueblos Mágicos conectados: ${esc(enumerar(sinPueblos.map(p => p.nombre)))}.` : ''}</p>
+  ${barras(conPueblos.slice(0, 10).map(p => ({ t: p.nombre, v: p.n })))}`;
+
+  if (rutasOrden.length) h += `
+  <h3>Distancias de las rutas (sin los valores nominales)</h3>
+  <p>${num(rutasOrden.length)} rutas: media de <b>${num(d3.mean(rutasOrden, l => l.w))} km</b> y mediana de <b>${num(d3.median(rutasOrden, l => l.w))} km</b>.
+  La más larga es ${esc(par(rutasOrden[0]))} y la más corta, ${esc(par(rutasOrden[rutasOrden.length - 1]))}.</p>`;
+
+  h += `
+  <h2>Interpretación cualitativa</h2>
+  <h3>Forma general</h3>
+  <p>${a.hojas / (a.N || 1) > 0.5
+    ? 'La red tiene una estructura de <b>centros y periferia</b>: pocos nodos concentran muchas conexiones y la mayoría cuelga de uno solo. Visualmente son «estrellas» unidas entre sí por las rutas.'
+    : 'La mayoría de los nodos tiene más de una conexión, así que la red no depende solo de unos cuantos centros.'}
+  ${a.agrupamiento < 0.15 ? 'El agrupamiento es bajo: es raro que dos vecinos de un nodo estén también conectados entre sí, por lo que hay pocos caminos alternativos locales.' : a.hayTriangulos ? 'Hay grupos de nodos conectados entre sí (triángulos), que ofrecen caminos alternativos.' : ''}</p>
+
+  <h3>Papel de cada tipo de nodo</h3>
+  <p>${estadosTop >= 3 ? `Los <b>Estados son los articuladores</b> de la red: ${estadosTop} de los 5 nodos con más conexiones lo son.` : 'Las conexiones se reparten entre distintos tipos de nodo.'}
+  ${hayPueblos ? 'Los Pueblos Mágicos funcionan sobre todo como <b>terminales</b>: se integran a la red a través de su Estado. Esto refleja cómo se capturaron los datos y no significa que estén aislados por carretera.' : ''}</p>
+
+  <h3>Centros y puentes</h3>
+  <p><b>${esc(a.porGrado[0] ? a.porGrado[0].nombre : '—')}</b> es el nodo con más conexiones (${a.porGrado[0] ? a.porGrado[0].grado : 0}), seguido de ${esc(enumerar(a.porGrado.slice(1, 4).map(f => `${f.nombre} (${f.grado})`)))}.
+  Por intermediación destacan ${esc(enumerar(puente.slice(0, 3).map(f => f.nombre)))}: están en muchos de los caminos más cortos, de modo que quitarlos alargaría o cortaría recorridos dentro de esta red.</p>
+  ${hayPueblos ? `<p>El grado de un Estado depende en buena parte de cuántos Pueblos Mágicos tiene en el archivo. Un grado alto (por ejemplo, ${esc(enumerar(conPueblos.slice(0, 3).map(p => `${p.nombre}, con ${p.n}`)))}) indica <b>concentración de nodos registrados</b>; por sí solo no mide importancia turística, económica ni vial.</p>` : ''}
+
+  <h2>Alcances y limitaciones</h2>
+  <ul>
+    <li>Los ${PESO_NOMINAL} km de pertenencia son un marcador. Por eso el grosor de esas líneas y la columna «Suma km» no deben leerse como distancias reales.</li>
+    <li>Las rutas incluidas son las que contiene el archivo, no toda la red carretera. Sus kilómetros no se han verificado contra una fuente externa.</li>
+    <li>Si un par de nodos aparece repetido, se conserva la primera fila, aunque la repetida traiga otra distancia.</li>
+    <li>Los saltos y la intermediación cuentan conexiones, no kilómetros.</li>
+    ${a.sospechosos.length ? `<li class="alerta"><b>Posible error en los datos:</b> ${num(a.sospechosos.length)} conexión/es de ${PESO_NOMINAL} km unen dos Estados (${esc(enumerar(a.sospechosos.map(l => `${l.o} – ${l.d}`)))}). Pueden ser localidades homónimas de un Estado que quedaron unidas al Estado. Si es así, crean atajos que no existen y alteran grados, caminos e intermediación.</li>` : ''}
+  </ul></div>`;
+  el.innerHTML = h;
+}
+
+const VISTAS_IMPL = { matriz: pintarVistaMatriz, interpretacion: pintarVistaInterpretacion };
+
+// Muestra la vista de análisis activa (o la oculta si está activo un modo de red).
+function renderVista() {
+  const el = document.getElementById('vista');
+  document.body.classList.toggle('en-vista', !!state.vista);
+  if (!state.vista) { el.innerHTML = ''; return; }
+  ocultarTip();
+  el.scrollTop = 0;
+  if (!M) { el.innerHTML = '<div class="hoja"><p>Carga los archivos de nodos y conexiones para ver esta pestaña.</p></div>'; return; }
+  try {
+    VISTAS_IMPL[state.vista](el);
+  } catch (err) {
+    console.error(err); el.innerHTML = `<div class="hoja"><p><b>No se pudo generar esta pestaña.</b> ${esc(err.message || String(err))}</p></div>`;
+  }
 }
 
 // ============================================================
