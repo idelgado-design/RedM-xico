@@ -1,0 +1,241 @@
+﻿Nodo,Tipo,Grado,Suma_km
+Edo Mex,Estados,22,2280
+Puebla,Estados,19,1785
+Jalisco,Estados,18,1860
+Veracruz,Estados,17,4655
+Michoacán,Estados,15,1830
+Querétaro,Estados,15,1960
+San Luis Potosí,Estados,15,3385
+Zacatecas,Estados,15,2638
+Coahuila,Estados,14,2610
+Hidalgo,Estados,14,1280
+Guanajuato,Estados,13,1520
+Nayarit,Estados,13,2110
+Chiapas,Estados,10,1830
+Nuevo León,Estados,10,1650
+Oaxaca,Estados,10,2250
+Yucatán,Estados,10,890
+Aguascalientes,Estados,9,838
+Chihuahua,Estados,9,2420
+Guerrero,Estados,9,1670
+Morelos,Estados,9,840
+Sinaloa,Estados,9,1970
+Durango,Estados,8,2570
+Sonora,Estados,8,1850
+Campeche,Estados,7,1180
+Quintana Roo,Estados,7,980
+Tabasco,Estados,7,1300
+Tlaxcala,Estados,7,631
+Tamaulipas,Estados,6,1450
+Baja California Sur,Estados,5,1680
+Baja California,Estados,4,1780
+Ciudad de México,Estados,4,476
+Colima,Estados,4,600
+Morelia (C),Capital,4,730
+Ciudad de México (C),Capital,3,245
+Guadalajara (C),Capital,3,545
+Tlaxcala (C),Capital,3,270
+Toluca (C),Capital,3,315
+Celaya,Ciudad (no listada en Points),2,160
+La Paz (C),Capital,2,1750
+León,Ciudad (no listada en Points),2,235
+Mexicali (C),Capital,2,1750
+Monterrey (C),Capital,2,560
+Tepic (C),Capital,2,255
+Zacatecas (C),Capital,2,165
+Acaxochitlán,Pueblo Mágico,1,50
+Aculco,Pueblo Mágico,1,50
+Aguascalientes (C),Capital,1,50
+Ahuacatlán,Pueblo Mágico,1,50
+Ajijic,Pueblo Mágico,1,50
+Amatlán de Cañas · Compostela,Pueblo Mágico,1,50
+Amealco de Bonfil,Pueblo Mágico,1,50
+Angangueo,Pueblo Mágico,1,50
+Aquismón,Pueblo Mágico,1,50
+Arteaga,Pueblo Mágico,1,50
+Atlixco,Pueblo Mágico,1,50
+Bacalar,Pueblo Mágico,1,50
+Batopilas,Pueblo Mágico,1,50
+Bernal,Pueblo Mágico,1,50
+Bustamante,Pueblo Mágico,1,50
+Cadereyta de Montes,Pueblo Mágico,1,50
+Campeche (C),Capital,1,50
+Candela,Pueblo Mágico,1,50
+Candelaria,Pueblo Mágico,1,50
+Capulálpam de Méndez,Pueblo Mágico,1,50
+Casas Grandes,Pueblo Mágico,1,50
+Cavillo,Pueblo Mágico,1,50
+Central Cepeda,Pueblo Mágico,1,50
+Chetumal (C),Capital,1,50
+Chiapa de Corzo,Pueblo Mágico,1,50
+Chignahuapan,Pueblo Mágico,1,50
+Chihuahua (C),Capital,1,50
+Chilpancingo (C),Capital,1,50
+Cholula,Pueblo Mágico,1,50
+Ciudad Victoria (C),Capital,1,50
+Ciudad del Maíz,Pueblo Mágico,1,50
+Coatepec,Pueblo Mágico,1,50
+Cocula,Pueblo Mágico,1,50
+Colima (C),Capital,1,50
+Comala,Pueblo Mágico,1,50
+Comitán de Domíngez,Pueblo Mágico,1,50
+Comonfort,Pueblo Mágico,1,50
+Copainalá,Pueblo Mágico,1,50
+Cosalá,Pueblo Mágico,1,50
+Coscomatepec,Pueblo Mágico,1,50
+Cotija,Pueblo Mágico,1,50
+Cozumel,Pueblo Mágico,1,50
+Creel,Pueblo Mágico,1,50
+Cuatro Ciénegas,Pueblo Mágico,1,50
+Cuernavaca (C),Capital,1,50
+Cuetzalan del Progreso,Pueblo Mágico,1,50
+Cuitzeo del Porvenir,Pueblo Mágico,1,50
+Culiacán (C),Capital,1,50
+Córdoba,Pueblo Mágico,1,50
+Dolores,Pueblo Mágico,1,50
+Durango (C),Capital,1,50
+El Fuerte,Pueblo Mágico,1,50
+El Oro,Pueblo Mágico,1,50
+El Rosario,Pueblo Mágico,1,50
+Espita,Pueblo Mágico,1,50
+Frontera,Pueblo Mágico,1,50
+General Terán,Pueblo Mágico,1,50
+General Zaragoz,Pueblo Mágico,1,50
+Guachochi,Pueblo Mágico,1,50
+Guadalupe,Pueblo Mágico,1,50
+Guanajuato (C),Capital,1,50
+Hermosillo (C),Capital,1,50
+Hidalgo del Parral,Pueblo Mágico,1,50
+Huamantla,Pueblo Mágico,1,50
+Huasca de Ocampo,Pueblo Mágico,1,50
+Huauchinango,Pueblo Mágico,1,50
+Huautla de Jiménez,Pueblo Mágico,1,50
+Huejotzingo,Pueblo Mágico,1,50
+Huichapan,Pueblo Mágico,1,50
+Isla Aguada,Pueblo Mágico,1,50
+Isla Mujeres,Pueblo Mágico,1,50
+Ixcateopan,Pueblo Mágico,1,50
+Ixtapan,Pueblo Mágico,1,50
+Ixtenco,Pueblo Mágico,1,50
+Ixtlán del Río,Pueblo Mágico,1,50
+Izamal,Pueblo Mágico,1,50
+Jala,Pueblo Mágico,1,50
+Jalpa de Cánovas,Pueblo Mágico,1,50
+Jalpan de Serra,Pueblo Mágico,1,50
+Jerez de García Salinas,Pueblo Mágico,1,50
+Jilotepec,Pueblo Mágico,1,50
+Jiquilpan,Pueblo Mágico,1,50
+Lagos de Moreno,Pueblo Mágico,1,50
+Linares,Pueblo Mágico,1,50
+Loreto,Pueblo Mágico,1,50
+Magdalena de Kino,Pueblo Mágico,1,50
+Malinalco,Pueblo Mágico,1,50
+Maní,Pueblo Mágico,1,50
+Mapimí,Pueblo Mágico,1,50
+Mascota,Pueblo Mágico,1,50
+Mazamitla,Pueblo Mágico,1,50
+Merida (C),Capital,1,50
+Metepec,Pueblo Mágico,1,50
+Mexcaltitán,Pueblo Mágico,1,50
+Meztitlán,Pueblo Mágico,1,50
+Mier,Pueblo Mágico,1,50
+Mineral de Pozos,Pueblo Mágico,1,50
+Mineral del Chico,Pueblo Mágico,1,50
+Mocorito,Pueblo Mágico,1,50
+Motul,Pueblo Mágico,1,50
+Múzquiz,Pueblo Mágico,1,50
+Naolinco de Victoria,Pueblo Mágico,1,50
+Nochistlán de Mejía ·,Pueblo Mágico,1,50
+Nombre de Dios,Pueblo Mágico,1,50
+Oaxaca (C),Capital,1,50
+Ocozocoautla,Pueblo Mágico,1,50
+Orizaba,Pueblo Mágico,1,50
+Otumba,Pueblo Mágico,1,50
+Pabellón de Hidalgo,Pueblo Mágico,1,50
+Pachuca (C),Capital,1,50
+Pahuatlán,Pueblo Mágico,1,50
+Palenque,Pueblo Mágico,1,50
+Palizada,Pueblo Mágico,1,50
+Papantla,Pueblo Mágico,1,50
+Paracho,Pueblo Mágico,1,50
+Parras de la Fuente,Pueblo Mágico,1,50
+Pinal de Amoles,Pueblo Mágico,1,50
+Pinos,Pueblo Mágico,1,50
+Puebla (C),Capital,1,50
+Puerto Balleto,Pueblo Mágico,1,50
+Pátzcuaro,Pueblo Mágico,1,50
+Querétaro (C),Capital,1,50
+Real de Asientos,Pueblo Mágico,1,50
+Real de Catorce,Pueblo Mágico,1,50
+Real del Monte,Pueblo Mágico,1,50
+Saltillo (C),Capital,1,50
+Salvatierra,Pueblo Mágico,1,50
+San Blas,Pueblo Mágico,1,50
+San Carlos,Pueblo Mágico,1,50
+San Cristóbal de las Casas,Pueblo Mágico,1,50
+San Ignacio,Pueblo Mágico,1,50
+San Joaquín,Pueblo Mágico,1,50
+San José de Gracia,Pueblo Mágico,1,50
+San Juan Teotihucan,Pueblo Mágico,1,50
+San Luis Potosí (C),Capital,1,50
+San Martín de las Piramides,Pueblo Mágico,1,50
+San Pablo Villa de Mitla,Pueblo Mágico,1,50
+San Pedro y San Pablo Teposcolula,Pueblo Mágico,1,50
+San Sebastián del Oeste,Pueblo Mágico,1,50
+Santa Catarina Juquila,Pueblo Mágico,1,50
+Santa Clara del Cobre,Pueblo Mágico,1,50
+Santa María del Río,Pueblo Mágico,1,50
+Santa Rosalía,Pueblo Mágico,1,50
+Santiago,Pueblo Mágico,1,50
+Sayula,Pueblo Mágico,1,50
+Sayulita,Pueblo Mágico,1,50
+Sisal,Pueblo Mágico,1,50
+Sombrerete,Pueblo Mágico,1,50
+Tacámbaro,Pueblo Mágico,1,50
+Talpa de Allende,Pueblo Mágico,1,50
+Tapalpa,Pueblo Mágico,1,50
+Tapijulapa,Pueblo Mágico,1,50
+Taxco de Alarcón,Pueblo Mágico,1,50
+Teapa,Pueblo Mágico,1,50
+Tecate,Pueblo Mágico,1,50
+Tecozautla,Pueblo Mágico,1,50
+Tekax,Pueblo Mágico,1,50
+Temacapulín,Pueblo Mágico,1,50
+Tepozotlán,Pueblo Mágico,1,50
+Tepoztlán,Pueblo Mágico,1,50
+Tequila,Pueblo Mágico,1,50
+Tequisquiapan,Pueblo Mágico,1,50
+Tetela de Ocampo,Pueblo Mágico,1,50
+Teziutlán,Pueblo Mágico,1,50
+Teúl de González Ortega,Pueblo Mágico,1,50
+Tierra Nueva,Pueblo Mágico,1,50
+Tlaltizapán de Zapata,Pueblo Mágico,1,50
+Tlaquepaque,Pueblo Mágico,1,50
+Tlatlauquitepec,Pueblo Mágico,1,50
+Tlaxco,Pueblo Mágico,1,50
+Tlayacapan,Pueblo Mágico,1,50
+Todos Santos,Pueblo Mágico,1,50
+Tonatico,Pueblo Mágico,1,50
+Tula,Pueblo Mágico,1,50
+Tulum,Pueblo Mágico,1,50
+Tuxtla Gutiérrez (C),Capital,1,50
+Tzintzuntzan,Pueblo Mágico,1,50
+Ures,Pueblo Mágico,1,50
+Valladolid,Pueblo Mágico,1,50
+Valle de Bravo,Pueblo Mágico,1,50
+Viesca,Pueblo Mágico,1,50
+Villa del Carbón,Pueblo Mágico,1,50
+Villahermosa (C),Capital,1,50
+Villanueva,Pueblo Mágico,1,50
+Xalapa (C),Capital,1,50
+Xico,Pueblo Mágico,1,50
+Xicotepec,Pueblo Mágico,1,50
+Xilitla,Pueblo Mágico,1,50
+Xochitepec,Pueblo Mágico,1,50
+Yuriria,Pueblo Mágico,1,50
+Zacatlán,Pueblo Mágico,1,50
+Zempoala,Pueblo Mágico,1,50
+Zihuatanejo,Pueblo Mágico,1,50
+Zimapán,Pueblo Mágico,1,50
+Zozocolco de Hidalgo,Pueblo Mágico,1,50
+Álamos,Pueblo Mágico,1,50

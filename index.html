@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Red de Entidades Federativas</title>
+<style>
+  :root{
+    /* AJUSTABLE: tipografía y colores de la interfaz (Nunito se usa si está instalada en el equipo) */
+    --fuente: 'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --fondo: #f4f3ef;
+    --panel: #fbfaf7;
+    --borde: #dcdad2;
+    --texto: #26302a;
+    --suave: #6b746d;
+    --acento: #2e9e5b;
+    --acento-oscuro: #0f4d2e;
+  }
+  *{ box-sizing: border-box; }
+  html, body{ height: 100%; margin: 0; }
+  body{ font-family: var(--fuente); background: var(--fondo); color: var(--texto); display: flex; flex-direction: column; overflow: hidden; font-size: 14px; }
+  button, select, input{ font-family: inherit; }
+
+  /* Barra superior */
+  #superior{ display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--borde); flex-wrap: wrap; }
+  #superior h1{ font-size: 17px; font-weight: 800; margin: 0 6px 0 0; color: var(--acento-oscuro); }
+  .btn{ display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border: 1px solid var(--borde); border-radius: 8px; background: #fff; color: var(--texto); font-weight: 700; font-size: 13px; cursor: pointer; white-space: nowrap; }
+  .btn:hover{ border-color: var(--acento); }
+  .btn.primario{ background: var(--acento-oscuro); color: #fff; border-color: var(--acento-oscuro); }
+  .btn input[type=file]{ display: none; }
+  .ok{ font-size: 12px; color: var(--suave); }
+  .ok b{ color: var(--acento); }
+  #pestanas{ display: flex; gap: 4px; margin-left: auto; flex-wrap: wrap; }
+  .pestana{ padding: 7px 14px; border-radius: 8px; border: 1px solid var(--borde); background: #fff; font-weight: 700; font-size: 13px; cursor: pointer; color: var(--texto); }
+  .pestana.activa{ background: var(--acento-oscuro); color: #fff; border-color: var(--acento-oscuro); }
+
+  /* Cuerpo */
+  #cuerpo{ flex: 1; display: flex; min-height: 0; }
+  #barra{ width: 310px; background: var(--panel); border-right: 1px solid var(--borde); overflow-y: auto; overflow-x: hidden; transition: width .2s ease; flex-shrink: 0; }
+  #barra.colapsada{ width: 0; border-right: 0; }
+  .barra-in{ width: 310px; padding: 14px 16px 24px; }
+  .barra-in section{ margin-bottom: 18px; }
+  .barra-in h2{ font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--suave); margin: 0 0 8px; font-weight: 800; }
+  .fila{ display: flex; align-items: center; gap: 8px; padding: 3px 0; cursor: pointer; }
+  .fila .punto{ width: 14px; height: 14px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--borde); flex-shrink: 0; }
+  .fila .cuenta{ margin-left: auto; color: var(--suave); font-size: 12px; }
+  .fila.apagada .punto{ opacity: .3; }
+  .fila.apagada span.nom{ color: var(--suave); text-decoration: line-through; }
+  .chk{ display: flex; align-items: center; gap: 8px; padding: 3px 0; cursor: pointer; }
+  .aviso{ border-left: 3px solid #d9a441; background: #fbf4e3; padding: 7px 10px; margin-bottom: 8px; border-radius: 0 6px 6px 0; font-size: 12.5px; line-height: 1.4; }
+  .aviso.info{ border-color: var(--acento); background: #eaf5ee; }
+  .aviso b{ font-weight: 800; }
+  .aviso .det{ color: var(--suave); display: block; margin-top: 2px; word-break: break-word; }
+  .nada{ color: var(--suave); font-size: 12.5px; }
+
+  /* Escenario */
+  #escenario{ flex: 1; position: relative; min-width: 0; }
+  #lienzo{ position: absolute; inset: 0; }
+  #lienzo canvas{ display: block; cursor: grab; }
+  #lienzo canvas.mano{ cursor: pointer; }
+  #modos-barra{ position: absolute; top: 10px; left: 12px; right: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; pointer-events: none; z-index: 3; }
+  #modos-barra > *{ pointer-events: auto; }
+  .chip{ background: rgba(251,250,247,.94); border: 1px solid var(--borde); border-radius: 8px; padding: 5px 10px; font-size: 12.5px; color: var(--suave); display: inline-flex; align-items: center; gap: 6px; }
+  .chip select{ border: 1px solid var(--borde); border-radius: 6px; padding: 3px 6px; background: #fff; color: var(--texto); font-size: 12.5px; }
+  .chip.aviso-chip{ cursor: pointer; color: #8a5a00; border-color: #e3c377; background: #fbf4e3; font-weight: 700; }
+  #zoom-ctl{ position: absolute; right: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 3; }
+  #zoom-ctl button{ width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--borde); background: var(--panel); font-size: 18px; font-weight: 700; cursor: pointer; color: var(--texto); }
+  #zoom-ctl button:hover{ border-color: var(--acento); }
+  #zoom-ctl button.texto{ font-size: 11px; }
+  #vacio{ position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 4; background: var(--fondo); }
+  #vacio .tarjeta{ background: var(--panel); border: 1px solid var(--borde); border-radius: 14px; padding: 28px 34px; max-width: 460px; text-align: center; }
+  #vacio h2{ margin: 0 0 8px; color: var(--acento-oscuro); font-size: 22px; }
+  #vacio p{ margin: 6px 0; color: var(--suave); line-height: 1.5; }
+  #vacio .estado{ margin-top: 14px; text-align: left; display: inline-block; font-size: 13.5px; }
+  #error-modo{ position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); background: #fff3f0; border: 1px solid #e8b4a8; color: #8a2a14; padding: 16px 22px; border-radius: 10px; max-width: 480px; z-index: 5; display: none; }
+  #sin-nodos{ position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); color: var(--suave); display: none; z-index: 2; }
+  #tip{ position: fixed; z-index: 20; pointer-events: none; background: rgba(28,40,32,.96); color: #f4f3ef; padding: 8px 11px; border-radius: 8px; font-size: 12.5px; line-height: 1.45; max-width: 280px; display: none; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+  #tip b{ font-weight: 800; }
+  #tip .k{ color: #a9c9b4; }
+</style>
+</head>
+<body>
+
+<div id="superior">
+  <button class="btn" id="btn-panel" title="Mostrar u ocultar la barra lateral">☰ Panel</button>
+  <h1>Red de Entidades Federativas</h1>
+  <label class="btn primario">Cargar nodos<input type="file" id="in-nodos" accept=".csv,text/csv,text/plain"></label>
+  <label class="btn primario">Cargar conexiones<input type="file" id="in-enlaces" accept=".csv,text/csv,text/plain"></label>
+  <label class="btn" title="CSV con Nodo, Latitud, Longitud (para la Red geográfica)">Cargar coordenadas<input type="file" id="in-coords" accept=".csv,text/csv,text/plain"></label>
+  <span class="ok" id="estado-archivos"></span>
+  <div id="pestanas"></div>
+</div>
+
+<div id="cuerpo">
+  <aside id="barra"><div class="barra-in">
+    <section>
+      <h2 id="leyenda-titulo">Leyenda</h2>
+      <div id="leyenda"><span class="nada">Carga los archivos para ver las categorías.</span></div>
+      <label class="chk" id="fila-aislados" style="display:none"><input type="checkbox" id="chk-aislados"><span>Mostrar nodos sin conexiones <span id="n-aislados"></span></span></label>
+    </section>
+    <section>
+      <h2>Capas</h2>
+      <div id="capas"></div>
+    </section>
+    <section>
+      <h2>Avisos</h2>
+      <div id="avisos"><span class="nada">Sin avisos.</span></div>
+    </section>
+    <section>
+      <h2>Resumen</h2>
+      <div id="resumen" class="nada">—</div>
+    </section>
+  </div></aside>
+
+  <main id="escenario">
+    <div id="lienzo"></div>
+    <div id="modos-barra"></div>
+    <div id="zoom-ctl">
+      <button id="z-mas" title="Acercar">+</button>
+      <button id="z-menos" title="Alejar">−</button>
+      <button id="z-ajustar" class="texto" title="Ajustar la vista a todo el contenido">Ajustar</button>
+    </div>
+    <div id="sin-nodos">No hay nodos visibles con los filtros actuales.</div>
+    <div id="error-modo"></div>
+    <div id="vacio"><div class="tarjeta">
+      <h2>Red de Entidades Federativas</h2>
+      <p>Carga los dos archivos CSV para comenzar.</p>
+      <p>Usa los botones <b>Cargar nodos</b> y <b>Cargar conexiones</b> de la barra superior.</p>
+      <div class="estado" id="vacio-estado"></div>
+    </div></div>
+  </main>
+</div>
+<div id="tip"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+<script src="data/mapa_mexico.js"></script>
+<script>
+'use strict';
+
+// ============================================================
+// 1 CONFIGURACIÓN
+// ============================================================
+const FUENTE = "'Nunito','Segoe UI',system-ui,sans-serif";   // AJUSTABLE: tipografía de las etiquetas en el lienzo
+const COLOR_FONDO = '#f4f3ef';                                 // AJUSTABLE: fondo neutro del lienzo
+const COLOR_TEXTO = '#26302a';                                 // AJUSTABLE: color de las etiquetas
+const PALETA_VERDES = ['#0f4d2e', '#2e9e5b', '#8fcf6b', '#1b7a6e', '#c3e08a', '#4c8c4a', '#a3d9b1', '#0b3d2a']; // AJUSTABLE: colores por categoría (en orden de aparición)
+const COLOR_ENLACE_GRIS = '#8a948c';                           // AJUSTABLE: color de enlaces cuando se apaga el degradado
+const RADIO_MIN = 5, RADIO_MAX = 18;                           // AJUSTABLE: rango del radio de nodos (px de mundo)
+const RADIO_BASE = 8;                                          // AJUSTABLE: radio cuando todos los nodos valen lo mismo
+const GROSOR_MIN = 1.2, GROSOR_MAX = 7;                        // AJUSTABLE: rango del grosor de conexiones (medias)
+const GROSOR_BASE = 2.5;                                       // AJUSTABLE: grosor cuando no hay peso
+const OPACIDAD_ENLACE = 0.6;                                   // AJUSTABLE: transparencia normal de las conexiones
+const OPACIDAD_TENUE = 0.08;                                   // AJUSTABLE: lo que no está resaltado al seleccionar
+const TAM_ETIQUETA = 12;                                       // AJUSTABLE: tamaño de letra de las etiquetas (px de pantalla)
+const PAD_CONTORNO = 18;                                       // AJUSTABLE: holgura del contorno de cada área
+const SEP_FILA = 22;                                           // AJUSTABLE: separación vertical en modo bipartito
+const ESPACIO_ARCO = 46;                                       // AJUSTABLE: separación entre nodos de un anillo (arranque centralizado)
+const PASO_ANILLO = 52;                                        // AJUSTABLE: distancia entre anillos (arranque centralizado)
+const TIPO_PUNTEADO = '';                                      // AJUSTABLE: valor de la columna Tipo con línea punteada (vacío = el segundo valor distinto)
+const MODOS = [
+  { id: 'area',      nombre: 'Agrupación por Área' },
+  { id: 'bipartito', nombre: 'Bipartito en columnas' },
+  { id: 'arranque',  nombre: 'Arranque centralizado' },
+  { id: 'geo',       nombre: 'Red geográfica' }
+];
+const BIPARTITO_PREDETERMINADO = { izquierda: 'Estados', derecha: 'Pueblo Mágico' }; // AJUSTABLE: columnas iniciales del modo bipartito
+const GEO_ESCALA_RADIO = 0.65;                                 // AJUSTABLE: tamaño de los nodos en la red geográfica (respecto a los demás modos)
+const GEO_ESCALA_GROSOR = 0.45;                                // AJUSTABLE: grosor de las conexiones en la red geográfica
+const GEO_COLOR_TIERRA = '#e8e6dc', GEO_COLOR_LIMITE = '#bdbaac'; // AJUSTABLE: colores del mapa base
+const CAPAS_INICIALES = [                                      // AJUSTABLE: qué capas arrancan encendidas
+  ['nodos', 'Nodos', true],
+  ['etiquetas', 'Etiquetas', true],
+  ['enlaces', 'Conexiones', true],
+  ['degradado', 'Degradado de color origen → destino', true],
+  ['contornos', 'Contornos de grupo', true],
+  ['mapa', 'Mapa base (red geográfica)', true],
+  ['flechas', 'Flechas de dirección', false],
+  ['particulas', 'Partículas de dirección', false],
+  ['sinsolape', 'Evitar solapamiento de etiquetas', true]
+];
+
+// ============================================================
+// 2 ESTADO
+// ============================================================
+let M = null;            // modelo de datos (ver sección 4)
+let ESC = {};            // escalas (ver sección 5)
+const state = {
+  nodos: null,           // CSV de nodos leído
+  enlaces: null,         // CSV de conexiones leído
+  coords: null,          // coordenadas: { archivo, exactas: Map, aprox: Map } de nombre → {lat, lon}
+  modo: 'area',
+  sel: null,             // id del nodo seleccionado
+  hover: null,           // {tipo:'nodo'|'enlace', ...}
+  ocultas: new Set(),    // categorías ocultas
+  mostrarAislados: false,
+  capas: {},
+  hubCat: null,          // categoría de los hubs (arranque centralizado)
+  bipA: null, bipB: null,// categorías de las columnas (bipartito); bipB '*' = todas las demás
+  escena: null,
+  errorModo: null,
+  t: null,               // transformación de zoom actual
+  sucio: true,           // hay que redibujar
+  listo: false,          // p5 ya inicializó
+  p: null, zoomB: null, zoomSel: null
+};
+CAPAS_INICIALES.forEach(c => state.capas[c[0]] = c[2]);
+
+// ============================================================
+// 3 LECTURA DE CSV
+// ============================================================
+// Lee un archivo del equipo como texto UTF-8 (el navegador quita el BOM si existe).
+function leerTextoArchivo(file) {
+  return new Promise((ok, fallo) => {
+    const fr = new FileReader();
+    fr.onload = () => ok(String(fr.result));
+    fr.onerror = () => fallo(fr.error);
+    fr.readAsText(file, 'UTF-8');
+  });
+}
+
+// Decide entre coma y punto y coma contando separadores fuera de comillas en las primeras líneas.
+function detectarSeparador(texto) {
+  const lineas = texto.split(/\r?\n/).slice(0, 10).map(l => l.replace(/"[^"]*"/g, ''));
+  const cuenta = ch => lineas.reduce((a, l) => a + l.split(ch).length - 1, 0);
+  return cuenta(';') > cuenta(',') ? ';' : ',';
+}
+
+// Convierte el texto CSV en {cabecera, filas}; la primera fila es siempre el encabezado, las filas vacías se ignoran.
+function parsearCSV(texto) {
+  texto = texto.replace(/^﻿/, '');
+  const sep = detectarSeparador(texto);
+  const filas = d3.dsvFormat(sep).parseRows(texto);
+  const limpiar = r => r.map(c => (c == null ? '' : String(c)).trim());
+  const cabecera = filas.length ? limpiar(filas[0]) : [];
+  const datos = [];
+  for (let i = 1; i < filas.length; i++) {
+    const c = limpiar(filas[i]);
+    if (c.every(x => x === '')) continue;
+    datos.push({ n: i + 1, c });          // n = número de fila en el archivo (la 1 es el encabezado)
+  }
+  return { sep, cabecera, filas: datos };
+}
+
+// Extrae el número de un texto como "215 km" o "1,480 km"; devuelve null si no hay número.
+function leerNumero(txt) {
+  if (txt == null || txt === '') return null;
+  let s = String(txt).replace(/\s/g, '');
+  if (/^-?\d{1,3}(,\d{3})+(\.\d+)?/.test(s)) s = s.replace(/,/g, '');
+  else s = s.replace(',', '.');
+  const m = s.match(/-?\d+(\.\d+)?/);
+  return m ? parseFloat(m[0]) : null;
+}
+
+// Quita acentos, mayúsculas y espacios repetidos para comparar nombres de forma tolerante.
+const normalizar = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+
+// Escapa texto de los CSV antes de meterlo en HTML.
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+// ============================================================
+// 4 MODELO DE DATOS (nodos, enlaces, grado, vecinos)
+// ============================================================
+// Cruza los dos CSV: crea nodos, resuelve nombres, descarta filas inválidas y reúne los avisos para mostrarlos.
+function construirModelo() {
+  const avisos = [];
+  const nodes = [], byId = new Map(), dupNodos = [];
+  let hayPesoNodo = false;
+
+  for (const f of state.nodos.filas) {
+    const nombre = f.c[0];
+    if (!nombre) continue;
+    if (byId.has(nombre)) { dupNodos.push(nombre); continue; }
+    const w = f.c.length > 2 ? leerNumero(f.c[2]) : null;
+    if (w != null) hayPesoNodo = true;
+    const n = { id: nombre, name: nombre, cat: f.c[1] || '(sin categoría)', w, nb: new Set(), deg: 0, idx: nodes.length, size: 0 };
+    nodes.push(n); byId.set(nombre, n);
+  }
+  // Índice tolerante (sin acentos/mayúsculas); si dos nombres chocan se anula para no adivinar.
+  const porNorm = new Map();
+  nodes.forEach(n => { const k = normalizar(n.name); porNorm.set(k, porNorm.has(k) ? null : n); });
+  const resolver = nom => {
+    if (byId.has(nom)) return { n: byId.get(nom), aprox: false };
+    const m = porNorm.get(normalizar(nom));
+    return m ? { n: m, aprox: true } : null;
+  };
+
+  const links = [], claves = new Set();
+  const vacias = [], faltan = new Map(), aprox = new Map();
+  let omitidosNombre = 0, duplicados = 0, auto = 0, pesoMalo = 0, hayPesoL = false, hayTipo = false, haySentido = false;
+  const tipos = [];
+  let unidad = '';
+
+  for (const f of state.enlaces.filas) {
+    const [o = '', d = '', wt = '', tp = '', sn = ''] = f.c;
+    if (!o || !d) { vacias.push(f.n); continue; }
+    const ro = resolver(o), rd = resolver(d);
+    if (!ro || !rd) {
+      if (!ro) faltan.set(o, (faltan.get(o) || 0) + 1);
+      if (!rd) faltan.set(d, (faltan.get(d) || 0) + 1);
+      omitidosNombre++; continue;
+    }
+    if (ro.aprox) aprox.set(o, ro.n.name);
+    if (rd.aprox) aprox.set(d, rd.n.name);
+    if (ro.n === rd.n) { auto++; continue; }
+    const clave = ro.n.idx < rd.n.idx ? ro.n.idx + '|' + rd.n.idx : rd.n.idx + '|' + ro.n.idx;
+    if (claves.has(clave)) { duplicados++; continue; }
+    claves.add(clave);
+
+    const w = leerNumero(wt);
+    if (wt && w == null) pesoMalo++;
+    if (w != null) { hayPesoL = true; if (!unidad) unidad = wt.replace(/[-\d.,\s]/g, ''); }
+    if (tp) { hayTipo = true; if (!tipos.includes(tp)) tipos.push(tp); }
+    if (sn) haySentido = true;
+    // Sentido: "Destino → Origen" se normaliza invirtiendo s y t; "Ambos" marca punta doble.
+    const sNorm = sn.toLowerCase().replace(/->/g, '→');
+    const ambos = /ambos|↔|<→|both/.test(sNorm);
+    const inv = !ambos && /^destino\s*→/.test(sNorm);
+    links.push({
+      s: inv ? rd.n : ro.n, t: inv ? ro.n : rd.n, ambos,
+      o: ro.n.name, d: rd.n.name, w, wTxt: wt, tipo: tp,
+      sentidoTxt: ambos ? 'Ambos' : inv ? 'Destino → Origen' : 'Origen → Destino',
+      punteado: false, fase: links.length * 0.137 % 1
+    });
+  }
+
+  links.forEach(l => { l.s.nb.add(l.t.id); l.t.nb.add(l.s.id); });
+  nodes.forEach(n => { n.deg = n.nb.size; n.size = hayPesoNodo ? (n.w != null ? n.w : 0) : n.deg; });
+
+  const cats = [];
+  nodes.forEach(n => { if (!cats.includes(n.cat)) cats.push(n.cat); });
+  const tipoPunt = TIPO_PUNTEADO || tipos[1] || null;
+  links.forEach(l => { l.punteado = hayTipo && tipoPunt != null && l.tipo === tipoPunt; });
+
+  const sinConexion = nodes.filter(n => n.deg === 0).length;
+
+  // Avisos visibles para el usuario.
+  const lista = (arr, max = 12) => arr.slice(0, max).join(', ') + (arr.length > max ? ` … (+${arr.length - max})` : '');
+  if (vacias.length) avisos.push({ t: 'warn', x: `${vacias.length} fila(s) de «${state.enlaces.archivo}» omitidas por origen o destino vacío`, d: 'Filas: ' + lista(vacias) });
+  if (faltan.size) avisos.push({ t: 'warn', x: `${faltan.size} nombre(s) de conexiones no existen en «${state.nodos.archivo}» (${omitidosNombre} conexión/es omitidas)`, d: lista([...faltan.keys()], 30) });
+  if (aprox.size) avisos.push({ t: 'info', x: `${aprox.size} nombre(s) emparejados sin distinguir acentos o mayúsculas`, d: lista([...aprox].map(([a, b]) => `${a} → ${b}`)) });
+  if (duplicados) avisos.push({ t: 'info', x: `${duplicados} conexión/es duplicadas fusionadas (se conserva la primera)` });
+  if (auto) avisos.push({ t: 'warn', x: `${auto} conexión/es de un nodo consigo mismo omitidas` });
+  if (pesoMalo) avisos.push({ t: 'warn', x: `${pesoMalo} peso(s) de conexión no numéricos (se dibujan con el grosor base)` });
+  if (dupNodos.length) avisos.push({ t: 'warn', x: `${dupNodos.length} nodo(s) repetidos en el archivo de nodos (se conserva el primero)`, d: lista([...new Set(dupNodos)]) });
+  if (hayTipo && tipos.length > 2) avisos.push({ t: 'warn', x: `La columna Tipo tiene ${tipos.length} valores distintos; solo se esperan dos`, d: lista(tipos) });
+  if (hayTipo && tipoPunt) avisos.push({ t: 'info', x: `Línea punteada para el Tipo «${tipoPunt}»` });
+
+  return { nodes, byId, links, cats, hayPesoNodo, hayPesoL, hayTipo, haySentido, unidad, sinConexion, avisos, colores: {} };
+}
+
+// Devuelve los nodos y conexiones visibles según categorías ocultas y la casilla de nodos sin conexiones.
+function calcularVisibles() {
+  const nodes = M.nodes.filter(n => !state.ocultas.has(n.cat) && (state.mostrarAislados || n.deg > 0));
+  const ids = new Set(nodes.map(n => n.id));
+  const links = M.links.filter(l => ids.has(l.s.id) && ids.has(l.t.id));
+  return { nodes, ids, links };
+}
+
+// ============================================================
+// 5 ESCALAS
+// ============================================================
+// Crea las escalas de radio (raíz), grosor (lineal) y color (por categoría) a partir del modelo.
+function crearEscalas() {
+  const [mn, mx] = d3.extent(M.nodes, n => n.size);
+  ESC.radio = (mn == null || mn === mx) ? () => RADIO_BASE : d3.scaleSqrt().domain([mn, mx]).range([RADIO_MIN, RADIO_MAX]);
+  const [a, b] = d3.extent(M.links.filter(l => l.w != null), l => l.w);
+  ESC.grosor = (M.hayPesoL && a !== b) ? d3.scaleLinear().domain([a, b]).range([GROSOR_MIN, GROSOR_MAX]).clamp(true) : () => GROSOR_BASE;
+  M.cats.forEach((c, i) => M.colores[c] = PALETA_VERDES[i % PALETA_VERDES.length]);
+}
+const radioNodo = n => ESC.radio(n.size);
+const colorCat = n => M.colores[n.cat];
+const anchoEnlace = l => (l.w != null ? ESC.grosor(l.w) : GROSOR_BASE);
+
+// ============================================================
+// 6 MODOS (layout + dibujo por modo)
+// ============================================================
+const MODOS_IMPL = {
+  area:      { layout: layoutArea,      dibujar: dibujarArea },
+  bipartito: { layout: layoutBipartito, dibujar: dibujarBipartito },
+  arranque:  { layout: layoutArranque,  dibujar: dibujarArranque },
+  geo:       { layout: layoutGeo,       dibujar: dibujarGeo }
+};
+
+// ---------- 6.0 Utilidades de escena y primitivas de dibujo compartidas ----------
+
+// Escena vacía para cuando no hay nada que mostrar.
+function escenaVacia() { return { insts: [], links: [], titulos: [], limites: null }; }
+
+// Geometría de una conexión recta entre dos instancias, recortada al borde de los nodos.
+function geoLinea(l, a, b) {
+  const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, ux = dx / d, uy = dy / d;
+  const x0 = a.x + ux * a.r, y0 = a.y + uy * a.r, x1 = b.x - ux * b.r, y1 = b.y - uy * b.r;
+  return { l, a, b, kind: 'line', x0, y0, x1, y1, ux, uy, poly: [[x0, y0], [x1, y1]] };
+}
+
+// Geometría de una conexión curva horizontal (bezier) entre columnas; guarda una polilínea para detectar el cursor.
+function geoBez(l, a, b) {
+  const dir = Math.sign(b.x - a.x) || 1;
+  const x0 = a.x + dir * a.r, y0 = a.y, x1 = b.x - dir * b.r, y1 = b.y, mx = (x0 + x1) / 2;
+  const poly = [];
+  for (let i = 0; i <= 24; i++) {
+    const t = i / 24, u = 1 - t;
+    poly.push([u * u * u * x0 + 3 * u * u * t * mx + 3 * u * t * t * mx + t * t * t * x1,
+               u * u * u * y0 + 3 * u * u * t * y0 + 3 * u * t * t * y1 + t * t * t * y1]);
+  }
+  return { l, a, b, kind: 'bez', x0, y0, x1, y1, mx, ux: dir, uy: 0, poly };
+}
+
+// Punto de una conexión en el parámetro t (0 = origen, 1 = destino); lo usan las partículas.
+function puntoEnGeo(g, t) {
+  if (g.kind === 'line') return [g.x0 + (g.x1 - g.x0) * t, g.y0 + (g.y1 - g.y0) * t];
+  const u = 1 - t;
+  return [u * u * u * g.x0 + 3 * u * u * t * g.mx + 3 * u * t * t * g.mx + t * t * t * g.x1,
+          u * u * u * g.y0 + 3 * u * u * t * g.y0 + 3 * u * t * t * g.y1 + t * t * t * g.y1];
+}
+
+// Un nodo se atenúa si hay selección y no es el seleccionado ni vecino suyo.
+function atenuadoNodo(id) {
+  const s = state.sel;
+  if (!s || id === s) return false;
+  const n = M.byId.get(s);
+  return !(n && n.nb.has(id));
+}
+// Una conexión se atenúa si hay selección y no toca al nodo seleccionado.
+function atenuadoEnlace(l) { const s = state.sel; return !!s && l.s.id !== s && l.t.id !== s; }
+
+// Grosor en unidades de mundo; si la escena usa tamaños de pantalla, no crece al acercar el zoom.
+function anchoEnEscena(l, k, e) { return e.pantalla ? anchoEnlace(l) * GEO_ESCALA_GROSOR / k : anchoEnlace(l); }
+
+// Dibuja las conexiones (primero las atenuadas) con degradado origen → destino, grosor por peso y estilo por Tipo.
+function dibujarEnlaces(ctx, k, e) {
+  for (const pasada of [true, false]) {
+    for (const g of e.links) {
+      const at = atenuadoEnlace(g.l);
+      if (at !== pasada) continue;
+      const hov = state.hover && state.hover.tipo === 'enlace' && state.hover.g === g;
+      let w = Math.max(anchoEnEscena(g.l, k, e), 0.8 / k);
+      if (hov) w *= 1.6;
+      ctx.globalAlpha = at ? OPACIDAD_TENUE : (hov ? 1 : OPACIDAD_ENLACE);
+      ctx.lineWidth = w;
+      ctx.lineCap = 'butt';
+      const c0 = colorCat(g.a.n), c1 = colorCat(g.b.n);
+      if (state.capas.degradado && c0 !== c1 && (g.x0 !== g.x1 || g.y0 !== g.y1)) {
+        const gr = ctx.createLinearGradient(g.x0, g.y0, g.x1, g.y1);
+        gr.addColorStop(0, c0); gr.addColorStop(1, c1);
+        ctx.strokeStyle = gr;
+      } else ctx.strokeStyle = state.capas.degradado ? c0 : COLOR_ENLACE_GRIS;
+      ctx.setLineDash(g.l.punteado ? [w * 3 + 4 / k, w * 2 + 3 / k] : []);
+      ctx.beginPath();
+      ctx.moveTo(g.x0, g.y0);
+      if (g.kind === 'line') ctx.lineTo(g.x1, g.y1);
+      else ctx.bezierCurveTo(g.mx, g.y0, g.mx, g.y1, g.x1, g.y1);
+      ctx.stroke();
+    }
+  }
+  ctx.setLineDash([]); ctx.globalAlpha = 1;
+}
+
+// Dibuja un triángulo de flecha con la punta en (x,y) apuntando en la dirección (ux,uy).
+function puntaFlecha(ctx, x, y, ux, uy, largo, medio) {
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.lineTo(x - ux * largo - uy * medio, y - uy * largo + ux * medio);
+  ctx.lineTo(x - ux * largo + uy * medio, y - uy * largo - ux * medio);
+  ctx.closePath(); ctx.fill();
+}
+
+// Capa opcional: flecha en el extremo destino (y en ambos si el Sentido es "Ambos").
+function dibujarFlechas(ctx, k, e) {
+  for (const g of e.links) {
+    if (atenuadoEnlace(g.l)) continue;
+    const w = anchoEnEscena(g.l, k, e), largo = 9 / k + w * 1.6, medio = largo * 0.42;
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = colorCat(g.b.n);
+    puntaFlecha(ctx, g.x1, g.y1, g.ux, g.uy, largo, medio);
+    if (g.l.ambos) { ctx.fillStyle = colorCat(g.a.n); puntaFlecha(ctx, g.x0, g.y0, -g.ux, -g.uy, largo, medio); }
+  }
+  ctx.globalAlpha = 1;
+}
+
+// Capa opcional: puntos que viajan de origen a destino para mostrar la dirección (usa el contador de cuadros de p5).
+function dibujarParticulas(ctx, k, e, frame) {
+  for (const g of e.links) {
+    if (atenuadoEnlace(g.l)) continue;
+    const t = (frame * 0.006 + g.l.fase) % 1;
+    const [x, y] = puntoEnGeo(g, t);
+    ctx.globalAlpha = 0.95;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(x, y, 3.6 / k, 0, 6.2832); ctx.fill();
+    ctx.fillStyle = M.colores[g.a.n.cat];
+    ctx.beginPath(); ctx.arc(x, y, 2.4 / k, 0, 6.2832); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+// Dibuja los nodos: color por categoría, borde blanco, anillo si están seleccionados o bajo el cursor.
+function dibujarNodos(ctx, k, e) {
+  for (const pasada of [true, false]) {
+    for (const it of e.insts) {
+      const at = atenuadoNodo(it.id);
+      if (at !== pasada) continue;
+      ctx.globalAlpha = at ? 0.15 : 1;
+      ctx.beginPath(); ctx.arc(it.x, it.y, it.r, 0, 6.2832);
+      ctx.fillStyle = colorCat(it.n); ctx.fill();
+      ctx.lineWidth = 1.6 / k; ctx.strokeStyle = '#ffffff'; ctx.stroke();
+      if (state.sel === it.id) {
+        ctx.beginPath(); ctx.arc(it.x, it.y, it.r + 3 / k, 0, 6.2832);
+        ctx.lineWidth = 2.5 / k; ctx.strokeStyle = COLOR_TEXTO; ctx.stroke();
+      } else if (state.hover && state.hover.tipo === 'nodo' && state.hover.it === it) {
+        ctx.beginPath(); ctx.arc(it.x, it.y, it.r + 2.5 / k, 0, 6.2832);
+        ctx.lineWidth = 2 / k; ctx.strokeStyle = 'rgba(38,48,42,.55)'; ctx.stroke();
+      }
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+// Dibuja etiquetas en pantalla con tamaño fijo; las de mayor grado van primero y se omiten las que se solapan.
+function dibujarEtiquetas(ctx, t, e) {
+  ctx.textBaseline = 'top';
+  const cajas = [];
+  const hov = state.hover && state.hover.tipo === 'nodo' ? state.hover.it : null;
+  const prioridad = it => (state.sel === it.id ? 3 : (hov === it ? 2 : (state.sel && !atenuadoNodo(it.id) ? 1 : 0)));
+  const orden = e.insts.slice().sort((a, b) => prioridad(b) - prioridad(a) || b.n.size - a.n.size);
+  let dibujadas = 0;
+  for (const it of orden) {
+    const p = prioridad(it);
+    if (state.sel && p === 0) continue;                           // con selección solo se rotula lo resaltado
+    const sx = t.x + it.x * t.k, sy = t.y + it.y * t.k, rr = it.r * t.k;
+    if (sx < -120 || sy < -30 || sx > ctx.canvas.clientWidth + 120 || sy > ctx.canvas.clientHeight + 30) continue;
+    const fuerte = p > 0 || it.hub;
+    ctx.font = `${fuerte ? 800 : 600} ${TAM_ETIQUETA}px ${FUENTE}`;
+    const w = ctx.measureText(it.n.name).width, h = TAM_ETIQUETA + 2;
+    let x, y;
+    if (it.side === 'left') { x = sx - rr - 6 - w; y = sy - h / 2; }
+    else if (it.side === 'right') { x = sx + rr + 6; y = sy - h / 2; }
+    else { x = sx - w / 2; y = sy + rr + 3; }
+    if (state.capas.sinsolape && p === 0 && !it.hub) {
+      if (cajas.some(c => x < c.x + c.w + 2 && x + w + 2 > c.x && y < c.y + c.h && y + h > c.y)) continue;
+    }
+    cajas.push({ x, y, w, h });
+    ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(244,243,239,.92)';
+    ctx.strokeText(it.n.name, x, y);
+    ctx.fillStyle = COLOR_TEXTO; ctx.fillText(it.n.name, x, y);
+    if (++dibujadas > 500) break;
+  }
+}
+
+// Dibuja los títulos de grupo/columna en pantalla (no se agrandan con el zoom).
+function dibujarTitulos(ctx, t, e) {
+  ctx.textBaseline = 'bottom'; ctx.textAlign = 'center';
+  ctx.font = `800 13px ${FUENTE}`;
+  for (const ti of e.titulos) {
+    const sx = t.x + ti.x * t.k, sy = t.y + ti.y * t.k;
+    ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(244,243,239,.9)';
+    ctx.strokeText(ti.texto.toUpperCase(), sx, sy);
+    ctx.fillStyle = ti.color; ctx.fillText(ti.texto.toUpperCase(), sx, sy);
+  }
+  ctx.textAlign = 'left';
+}
+
+// Orden común de dibujo (sin decoración): conexiones, flechas, partículas y nodos.
+function dibujarBase(ctx, k, e, frame) {
+  if (state.capas.enlaces) dibujarEnlaces(ctx, k, e);
+  if (state.capas.flechas && state.capas.enlaces) dibujarFlechas(ctx, k, e);
+  if (state.capas.particulas && state.capas.enlaces) dibujarParticulas(ctx, k, e, frame);
+  if (state.capas.nodos) dibujarNodos(ctx, k, e);
+}
+
+// ---------- 6.1 Agrupación por Área ----------
+
+// Calcula el layout por áreas: un círculo por categoría (d3.pack), nodos afinados con fuerzas y contorno convexo por categoría.
+function layoutArea(vis, W, H) {
+  const cats = M.cats.filter(c => vis.nodes.some(n => n.cat === c));
+  if (!cats.length) return escenaVacia();
+  const raiz = d3.hierarchy({ children: cats.map(c => ({ cat: c, children: vis.nodes.filter(n => n.cat === c).map(n => ({ n, value: 1 })) })) })
+    .sum(d => d.value || 0);
+  d3.pack().size([W, H]).padding(40)(raiz);
+  const insts = [], porId = new Map();
+  raiz.leaves().forEach(h => {
+    const n = h.data.n;
+    const it = { key: n.id, id: n.id, n, x: h.x, y: h.y, r: radioNodo(n), side: 'below', cx: h.parent.x, cy: h.parent.y };
+    insts.push(it); porId.set(n.id, it);
+  });
+  const lk = vis.links.map(l => ({ source: l.s.id, target: l.t.id }));
+  d3.forceSimulation(insts)
+    .force('x', d3.forceX(d => d.cx).strength(0.12))
+    .force('y', d3.forceY(d => d.cy).strength(0.12))
+    .force('col', d3.forceCollide(d => d.r + 5))
+    .force('link', d3.forceLink(lk).id(d => d.id).distance(60).strength(0.03))
+    .stop().tick(300);
+
+  const hulls = [], titulos = [];
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const c of cats) {
+    const pts = [];
+    insts.filter(i => i.n.cat === c).forEach(i => {
+      for (let a = 0; a < 12; a++) pts.push([i.x + Math.cos(a * Math.PI / 6) * (i.r + PAD_CONTORNO), i.y + Math.sin(a * Math.PI / 6) * (i.r + PAD_CONTORNO)]);
+    });
+    const hull = d3.polygonHull(pts);
+    if (!hull) continue;
+    hulls.push({ cat: c, hull, color: M.colores[c] });
+    const top = d3.least(hull, p => p[1]);
+    const cxm = d3.mean(hull, p => p[0]);
+    titulos.push({ x: cxm, y: top[1] - 8, texto: `${c} (${insts.filter(i => i.n.cat === c).length})`, color: M.colores[c] === PALETA_VERDES[4] ? '#6d8a2e' : M.colores[c] });
+    hull.forEach(p => { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); });
+  }
+  const links = vis.links.map(l => geoLinea(l, porId.get(l.s.id), porId.get(l.t.id)));
+  return { insts, links, titulos, hulls, limites: { x0, y0: y0 - 24, x1, y1 } };
+}
+
+// Dibuja el modo Agrupación por Área: contornos suavizados con línea punteada, y encima conexiones y nodos.
+function dibujarArea(ctx, k, e, frame) {
+  if (state.capas.contornos) {
+    const curva = d3.line().curve(d3.curveCatmullRomClosed.alpha(0.6)).context(ctx);
+    for (const h of e.hulls) {
+      ctx.beginPath(); curva(h.hull);
+      ctx.globalAlpha = 0.1; ctx.fillStyle = h.color; ctx.fill();
+      ctx.globalAlpha = 0.65; ctx.lineWidth = 1.6 / k; ctx.setLineDash([7 / k, 5 / k]); ctx.strokeStyle = h.color; ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+    }
+  }
+  dibujarBase(ctx, k, e, frame);
+}
+
+// ---------- 6.2 Bipartito en columnas ----------
+
+// Calcula dos columnas (categoría A a la izquierda, B —o todas las demás— a la derecha) ordenadas para reducir cruces.
+function layoutBipartito(vis, W, H) {
+  const A = state.bipA, B = state.bipB;
+  const enA = n => n.cat === A, enB = n => (B === '*' ? n.cat !== A : n.cat === B);
+  const enl = vis.links.filter(l => (enA(l.s) && enB(l.t)) || (enA(l.t) && enB(l.s)));
+  const conEnl = new Set();
+  enl.forEach(l => { conEnl.add(l.s.id); conEnl.add(l.t.id); });
+  const ok = n => conEnl.has(n.id) || state.mostrarAislados;
+  const der = vis.nodes.filter(n => enB(n) && !enA(n) && ok(n));
+  const izq = vis.nodes.filter(n => enA(n) && ok(n));
+  if (!izq.length && !der.length) return escenaVacia();
+
+  const gradoEnl = new Map();
+  enl.forEach(l => { gradoEnl.set(l.s.id, (gradoEnl.get(l.s.id) || 0) + 1); gradoEnl.set(l.t.id, (gradoEnl.get(l.t.id) || 0) + 1); });
+  // La columna con menos nodos se ordena por número de conexiones; la otra, por la posición media de sus vecinos.
+  const [ancla, otra] = izq.length <= der.length ? [izq, der] : [der, izq];
+  ancla.sort((a, b) => (gradoEnl.get(b.id) || 0) - (gradoEnl.get(a.id) || 0) || a.name.localeCompare(b.name, 'es'));
+  const idxAncla = new Map(ancla.map((n, i) => [n.id, i]));
+  const baric = n => {
+    const v = enl.filter(l => l.s === n || l.t === n).map(l => idxAncla.get(l.s === n ? l.t.id : l.s.id)).filter(i => i != null);
+    return v.length ? d3.mean(v) : 1e9;
+  };
+  const clave = new Map(otra.map(n => [n.id, baric(n)]));
+  otra.sort((a, b) => clave.get(a.id) - clave.get(b.id) || a.name.localeCompare(b.name, 'es'));
+
+  const gap = Math.max(380, Math.min(700, W * 0.55));
+  const alto = Math.max(izq.length, der.length, 1) * SEP_FILA;
+  const insts = [], porId = new Map();
+  const poner = (arr, x, side) => arr.forEach((n, i) => {
+    const it = { key: n.id, id: n.id, n, x, y: (i + 0.5) * alto / arr.length, r: radioNodo(n), side };
+    insts.push(it); porId.set(n.id, it);
+  });
+  poner(izq, -gap / 2, 'left'); poner(der, gap / 2, 'right');
+  const links = enl.map(l => geoBez(l, porId.get(l.s.id), porId.get(l.t.id)));
+  const nomB = B === '*' ? 'Otras categorías' : B;
+  const titulos = [
+    { x: -gap / 2, y: -14, texto: `${A} (${izq.length})`, color: M.colores[A] === PALETA_VERDES[4] ? '#6d8a2e' : M.colores[A] },
+    { x: gap / 2, y: -14, texto: `${nomB} (${der.length})`, color: B === '*' ? COLOR_TEXTO : M.colores[B] }
+  ];
+  return { insts, links, titulos, limites: { x0: -gap / 2 - 240, y0: -50, x1: gap / 2 + 240, y1: alto + 20 }, inicioArriba: true };
+}
+
+// Dibuja el modo bipartito: curvas bezier horizontales con grosor = peso, y los nodos en dos columnas.
+function dibujarBipartito(ctx, k, e, frame) { dibujarBase(ctx, k, e, frame); }
+
+// ---------- 6.3 Arranque centralizado ----------
+
+// Calcula una constelación por hub (nodo de la categoría elegida) con sus vecinos en anillos; los vecinos compartidos se repiten.
+function layoutArranque(vis, W, H) {
+  const hubs = vis.nodes.filter(n => n.cat === state.hubCat);
+  const consts = [];
+  for (const h of hubs) {
+    const vec = [];
+    for (const l of vis.links) { if (l.s === h) vec.push({ n: l.t, l }); else if (l.t === h) vec.push({ n: l.s, l }); }
+    if (!vec.length && !state.mostrarAislados) continue;
+    vec.sort((a, b) => M.cats.indexOf(a.n.cat) - M.cats.indexOf(b.n.cat) || a.n.name.localeCompare(b.n.name, 'es'));
+    const rh = radioNodo(h);
+    let rho = rh + 62, i = 0;
+    const anillos = [];
+    while (i < vec.length) {
+      const cap = Math.max(6, Math.floor(2 * Math.PI * rho / ESPACIO_ARCO));
+      anillos.push({ rho, items: vec.slice(i, i + cap) });
+      i += cap; rho += PASO_ANILLO;
+    }
+    const R = (anillos.length ? anillos[anillos.length - 1].rho : rh + 30) + 40;
+    consts.push({ h, anillos, R });
+  }
+  if (!consts.length) return escenaVacia();
+  const circ = consts.map(c => ({ r: c.R + 12, c }));
+  d3.packSiblings(circ);
+
+  const insts = [], links = [], decor = [];
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const ci of circ) {
+    const { c } = ci, cx = ci.x, cy = ci.y;
+    x0 = Math.min(x0, cx - c.R); x1 = Math.max(x1, cx + c.R); y0 = Math.min(y0, cy - c.R); y1 = Math.max(y1, cy + c.R);
+    decor.push({ x: cx, y: cy, r: c.R, color: colorCat(c.h) });
+    const hi = { key: 'h' + c.h.id, id: c.h.id, n: c.h, x: cx, y: cy, r: radioNodo(c.h), side: 'below', hub: true };
+    insts.push(hi);
+    c.anillos.forEach((an, ri) => {
+      an.items.forEach((v, j) => {
+        const ang = -Math.PI / 2 + (j + 0.5 * (ri % 2)) * 2 * Math.PI / an.items.length;
+        const li = { key: c.h.id + '>' + v.n.id, id: v.n.id, n: v.n, x: cx + Math.cos(ang) * an.rho, y: cy + Math.sin(ang) * an.rho, r: radioNodo(v.n), side: 'below' };
+        insts.push(li);
+        links.push(v.l.s === c.h ? geoLinea(v.l, hi, li) : geoLinea(v.l, li, hi));
+      });
+    });
+  }
+  return { insts, links, titulos: [], decor, limites: { x0, y0, x1, y1 } };
+}
+
+// Dibuja el modo Arranque centralizado: círculo tenue por constelación, conexiones radiales y nodos.
+function dibujarArranque(ctx, k, e, frame) {
+  if (state.capas.contornos) {
+    for (const d of e.decor) {
+      ctx.beginPath(); ctx.arc(d.x, d.y, d.r - 10, 0, 6.2832);
+      ctx.globalAlpha = 0.06; ctx.fillStyle = d.color; ctx.fill();
+      ctx.globalAlpha = 0.35; ctx.lineWidth = 1.3 / k; ctx.setLineDash([6 / k, 5 / k]); ctx.strokeStyle = d.color; ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+    }
+  }
+  dibujarBase(ctx, k, e, frame);
+}
+
+// ---------- 6.4 Red geográfica ----------
+
+// Busca la posición de un nodo: nombre exacto y, si no, sin distinguir acentos ni mayúsculas.
+function coordDe(n) {
+  return state.coords.exactas.get(n.name) || state.coords.aprox.get(normalizar(n.name)) || null;
+}
+
+// Coloca cada nodo en su latitud y longitud (proyección Mercator ajustada al contorno de México).
+function layoutGeo(vis, W, H) {
+  if (!state.coords) throw new Error('Faltan las coordenadas. Usa el botón «Cargar coordenadas» y elige data/Coordenadas.csv.');
+  const ubicados = [];
+  let sinCoord = 0;
+  for (const n of vis.nodes) { const c = coordDe(n); if (c) ubicados.push({ n, c }); else sinCoord++; }
+  const mapa = window.MAPA_MEXICO || [];
+  // El encuadre usa el mapa completo para que no cambie al filtrar categorías.
+  let marco = mapa.flatMap(e => e.anillos.flat());
+  if (!marco.length) marco = ubicados.map(u => [u.c.lon, u.c.lat]);
+  if (!marco.length) return Object.assign(escenaVacia(), { sinCoord, mapa: [] });
+  const proy = d3.geoMercator().fitSize([W, H], { type: 'MultiPoint', coordinates: marco });
+
+  const insts = [], porId = new Map();
+  ubicados.forEach(({ n, c }) => {
+    const [x, y] = proy([c.lon, c.lat]);
+    const r = radioNodo(n) * GEO_ESCALA_RADIO;
+    const it = { key: n.id, id: n.id, n, x, y, r, r0: r, side: 'below', lat: c.lat, lon: c.lon };
+    insts.push(it); porId.set(n.id, it);
+  });
+  insts.sort((a, b) => b.r0 - a.r0);   // los nodos pequeños quedan encima
+  // Las conexiones van de centro a centro porque el radio en el mundo cambia con el zoom.
+  const links = vis.links.filter(l => porId.has(l.s.id) && porId.has(l.t.id))
+    .map(l => Object.assign(geoLinea(l, { ...porId.get(l.s.id), r: 0 }, { ...porId.get(l.t.id), r: 0 }), { a: porId.get(l.s.id), b: porId.get(l.t.id) }));
+  const anillos = mapa.flatMap(e => e.anillos.map(an => an.map(p => proy(p))));
+  const caja = marco.map(p => proy(p));
+  const [x0, x1] = d3.extent(caja, p => p[0]), [y0, y1] = d3.extent(caja, p => p[1]);
+  return { insts, links, titulos: [], mapa: anillos, sinCoord, pantalla: true, limites: { x0, y0, x1, y1 } };
+}
+
+// Dibuja el mapa base y encima la red; nodos y líneas conservan su tamaño en pantalla al hacer zoom.
+function dibujarGeo(ctx, k, e, frame) {
+  if (state.capas.mapa) {
+    ctx.lineJoin = 'round'; ctx.lineWidth = 1 / k; ctx.fillStyle = GEO_COLOR_TIERRA; ctx.strokeStyle = GEO_COLOR_LIMITE;
+    for (const an of e.mapa) {
+      ctx.beginPath();
+      an.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+  }
+  e.insts.forEach(it => { it.r = it.r0 / k; });
+  // Las flechas terminan en el borde del nodo destino.
+  e.links.forEach(g => {
+    g.x0 = g.a.x + g.ux * g.a.r; g.y0 = g.a.y + g.uy * g.a.r;
+    g.x1 = g.b.x - g.ux * g.b.r; g.y1 = g.b.y - g.uy * g.b.r;
+  });
+  dibujarBase(ctx, k, e, frame);
+}
+
+// ============================================================
+// 7 INTERACCIÓN
+// ============================================================
+const tip = () => document.getElementById('tip');
+
+// Tamaño actual del lienzo (el contenedor del escenario).
+function tamLienzo() {
+  const h = document.getElementById('lienzo');
+  return { w: Math.max(300, h.clientWidth), h: Math.max(240, h.clientHeight) };
+}
+
+// Recalcula la escena del modo activo; si algo falla muestra el error en ese modo sin romper los demás.
+function actualizarEscena(ajustar) {
+  if (!M || !state.listo) return;
+  const { w, h } = tamLienzo();
+  state.errorModo = null; state.escena = null;
+  try {
+    state.escena = MODOS_IMPL[state.modo].layout(calcularVisibles(), w, h);
+  } catch (err) {
+    console.error(err); state.errorModo = err.message || String(err);
+  }
+  if (state.sel && !(state.escena && state.escena.insts.some(i => i.id === state.sel))) state.sel = null;
+  state.hover = null; ocultarTip();
+  const el = document.getElementById('error-modo');
+  el.style.display = state.errorModo ? 'block' : 'none';
+  if (state.errorModo) el.innerHTML = `<b>El modo «${esc(MODOS.find(m => m.id === state.modo).nombre)}» no pudo dibujarse.</b><br>${esc(state.errorModo)}<br><small>Los demás modos siguen disponibles.</small>`;
+  document.getElementById('sin-nodos').style.display = (state.escena && !state.escena.insts.length && !state.errorModo) ? 'block' : 'none';
+  if (ajustar) ajustarVista(false);
+  state.sucio = true;
+  renderResumen();
+}
+
+// Ajusta zoom y desplazamiento para ver todo (o, en bipartito, el inicio de la lista con letra legible).
+function ajustarVista(completo) {
+  const e = state.escena;
+  if (!e || !e.limites || !state.zoomB) return;
+  const { w, h } = tamLienzo(), b = e.limites, m = 48;
+  const bw = Math.max(b.x1 - b.x0, 1), bh = Math.max(b.y1 - b.y0, 1);
+  let k = Math.min((w - 2 * m) / bw, (h - 2 * m - 30) / bh, 1.6);
+  let tx = w / 2 - k * (b.x0 + b.x1) / 2, ty = h / 2 - k * (b.y0 + b.y1) / 2 + 10;
+  if (!completo && e.inicioArriba) {
+    k = Math.max(k, Math.min((w - 2 * m) / bw, 0.6));
+    tx = w / 2 - k * (b.x0 + b.x1) / 2; ty = 56 - k * b.y0;
+  }
+  state.zoomSel.call(state.zoomB.transform, d3.zoomIdentity.translate(tx, ty).scale(k));
+}
+
+// Distancia de un punto a un segmento (para detectar el cursor sobre una conexión).
+function distSeg(px, py, x0, y0, x1, y1) {
+  const dx = x1 - x0, dy = y1 - y0, l2 = dx * dx + dy * dy;
+  let t = l2 ? ((px - x0) * dx + (py - y0) * dy) / l2 : 0;
+  t = Math.max(0, Math.min(1, t));
+  return Math.hypot(px - (x0 + t * dx), py - (y0 + t * dy));
+}
+
+// Busca qué hay bajo el cursor: primero nodos (distancia al centro) y luego conexiones (distancia al segmento).
+function buscarBajoCursor(mx, my) {
+  const e = state.escena, t = state.t;
+  if (!e) return null;
+  const wx = (mx - t.x) / t.k, wy = (my - t.y) / t.k;
+  if (state.capas.nodos) {
+    for (let i = e.insts.length - 1; i >= 0; i--) {
+      const it = e.insts[i];
+      if (state.sel && atenuadoNodo(it.id)) continue;
+      if (Math.hypot(wx - it.x, wy - it.y) <= it.r + 3 / t.k) return { tipo: 'nodo', it };
+    }
+  }
+  if (state.capas.enlaces) {
+    let mejor = null, dm = Infinity;
+    for (const g of e.links) {
+      if (state.sel && atenuadoEnlace(g.l)) continue;
+      const tol = Math.max(anchoEnEscena(g.l, t.k, e) / 2, 4 / t.k);
+      for (let i = 0; i < g.poly.length - 1; i++) {
+        const d = distSeg(wx, wy, g.poly[i][0], g.poly[i][1], g.poly[i + 1][0], g.poly[i + 1][1]);
+        if (d <= tol && d < dm) { dm = d; mejor = g; }
+      }
+    }
+    if (mejor) return { tipo: 'enlace', g: mejor };
+  }
+  return null;
+}
+
+// Arma el contenido del tooltip con los encabezados de los CSV (o nombres por defecto si están vacíos).
+function htmlTooltip(h) {
+  const hn = state.nodos.cabecera, hl = state.enlaces.cabecera;
+  const f = (k, v) => `<span class="k">${esc(k)}:</span> ${esc(v)}`;
+  if (h.tipo === 'nodo') {
+    const n = h.it.n;
+    let s = `<b>${esc(n.name)}</b><br>${f(hn[0] || 'Nodo', n.name)}<br>${f(hn[1] || 'Categoría', n.cat)}`;
+    if (M.hayPesoNodo) s += `<br>${f(hn[2] || 'Peso', n.w != null ? n.w : '—')}`;
+    if (state.modo === 'geo') s += `<br>${f('Latitud', h.it.lat.toFixed(5))}<br>${f('Longitud', h.it.lon.toFixed(5))}`;
+    return s + `<br>${f('Conexiones', n.deg)}`;
+  }
+  const l = h.g.l;
+  let s = `${f(hl[0] || 'Origen', l.o)}<br>${f(hl[1] || 'Destino', l.d)}`;
+  if (M.hayPesoL) s += `<br>${f(hl[2] || 'Peso', l.wTxt || '—')}`;
+  if (M.hayTipo) s += `<br>${f(hl[3] || 'Tipo', l.tipo || '—')}`;
+  return s + `<br>${f(hl[4] || 'Sentido', l.sentidoTxt)}`;
+}
+
+// Muestra el tooltip junto al cursor sin salirse de la ventana.
+function mostrarTip(html, ev) {
+  const t = tip();
+  t.innerHTML = html; t.style.display = 'block';
+  const r = t.getBoundingClientRect(), pad = 14;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - pad;
+  if (y + r.height > innerHeight - 8) y = ev.clientY - r.height - pad;
+  t.style.left = Math.max(8, x) + 'px'; t.style.top = Math.max(8, y) + 'px';
+}
+function ocultarTip() { tip().style.display = 'none'; }
+
+// Registra zoom, paneo, hover y click sobre el canvas de p5.
+function conectarInteraccion(canvas) {
+  state.t = d3.zoomIdentity;
+  state.zoomB = d3.zoom().scaleExtent([0.04, 14]).on('zoom', ev => { state.t = ev.transform; state.sucio = true; });
+  state.zoomSel = d3.select(canvas).call(state.zoomB).on('dblclick.zoom', null);
+  canvas.addEventListener('mousemove', ev => {
+    if (!M) return;
+    const r = canvas.getBoundingClientRect();
+    const h = ev.buttons ? null : buscarBajoCursor(ev.clientX - r.left, ev.clientY - r.top);
+    const cambio = (h && state.hover) ? (h.tipo !== state.hover.tipo || h.it !== state.hover.it || h.g !== state.hover.g) : (h !== state.hover);
+    if (cambio) { state.hover = h; state.sucio = true; }
+    canvas.classList.toggle('mano', !!h);
+    if (h) mostrarTip(htmlTooltip(h), ev); else ocultarTip();
+  });
+  canvas.addEventListener('mouseleave', () => { if (state.hover) { state.hover = null; state.sucio = true; } ocultarTip(); });
+  canvas.addEventListener('click', ev => {
+    if (!M) return;
+    const r = canvas.getBoundingClientRect();
+    const h = buscarBajoCursor(ev.clientX - r.left, ev.clientY - r.top);
+    state.sel = (h && h.tipo === 'nodo') ? h.it.id : null;
+    state.sucio = true;
+  });
+}
+
+// Bucle de dibujo de p5: solo redibuja cuando algo cambió (o siempre si las partículas están activas).
+function dibujarFrame(p) {
+  const e = state.escena;
+  if (!state.sucio && !(state.capas.particulas && e)) return;
+  state.sucio = false;
+  p.background(COLOR_FONDO);
+  if (!e) return;
+  const ctx = p.drawingContext, t = state.t;
+  try {
+    ctx.save(); ctx.translate(t.x, t.y); ctx.scale(t.k, t.k);
+    MODOS_IMPL[state.modo].dibujar(ctx, t.k, e, p.frameCount);
+  } catch (err) {
+    console.error(err); state.errorModo = err.message || String(err);
+    const el = document.getElementById('error-modo');
+    el.style.display = 'block';
+    el.innerHTML = `<b>Error al dibujar el modo «${esc(MODOS.find(m => m.id === state.modo).nombre)}».</b><br>${esc(state.errorModo)}`;
+  } finally { ctx.restore(); }
+  ctx.save();
+  try {
+    if (state.capas.contornos) dibujarTitulos(ctx, t, e);
+    if (state.capas.etiquetas && state.capas.nodos) dibujarEtiquetas(ctx, t, e);
+  } finally { ctx.restore(); }
+}
+
+// ============================================================
+// 8 INTERFAZ (pestañas, barra lateral, botones)
+// ============================================================
+// Pinta las pestañas de modos.
+function renderPestanas() {
+  const c = document.getElementById('pestanas');
+  c.innerHTML = MODOS.map(m => `<button class="pestana${m.id === state.modo ? ' activa' : ''}" data-modo="${m.id}">${esc(m.nombre)}</button>`).join('');
+  c.querySelectorAll('button').forEach(b => b.onclick = () => {
+    state.modo = b.dataset.modo; renderPestanas(); renderModoBarra(); actualizarEscena(true);
+  });
+}
+
+// Pinta los controles propios del modo activo (hubs, columnas) y el chip de avisos.
+function renderModoBarra() {
+  const c = document.getElementById('modos-barra');
+  if (!M) { c.innerHTML = ''; return; }
+  const cats = M.cats.filter(x => !state.ocultas.has(x));
+  const opt = (v, sel, txt) => `<option value="${esc(v)}"${v === sel ? ' selected' : ''}>${esc(txt || v)}</option>`;
+  let h = '';
+  if (state.modo === 'area') h = `<span class="chip">Un contorno por categoría; las conexiones cruzan los contornos</span>`;
+  if (state.modo === 'arranque') h = `<span class="chip">Hubs: <select id="sel-hub">${cats.map(x => opt(x, state.hubCat)).join('')}</select> con sus vecinos alrededor</span>`;
+  if (state.modo === 'bipartito') h = `<span class="chip">Izquierda: <select id="sel-a">${cats.map(x => opt(x, state.bipA)).join('')}</select> Derecha: <select id="sel-b">${cats.filter(x => x !== state.bipA).map(x => opt(x, state.bipB)).join('')}${opt('*', state.bipB, 'Todas las demás')}</select></span>`;
+  if (state.modo === 'geo') h = `<span class="chip">Posición real de cada nodo; acerca el zoom para separar las zonas densas</span>`;
+  if (state.modo === 'geo' && state.coords) {
+    const faltan = M.nodes.filter(n => !coordDe(n)).length;
+    if (faltan) h += `<span class="chip">${faltan} nodo(s) sin coordenadas no se dibujan</span>`;
+  }
+  const nAv = M.avisos.filter(a => a.t === 'warn').length;
+  if (nAv) h += `<span class="chip aviso-chip" id="chip-avisos">⚠ ${nAv} aviso(s) sobre los datos — ver detalle</span>`;
+  c.innerHTML = h;
+  const on = (id, f) => { const el = document.getElementById(id); if (el) el.onchange = f; };
+  on('sel-hub', ev => { state.hubCat = ev.target.value; actualizarEscena(true); });
+  on('sel-a', ev => { state.bipA = ev.target.value; if (state.bipB === state.bipA) state.bipB = '*'; renderModoBarra(); actualizarEscena(true); });
+  on('sel-b', ev => { state.bipB = ev.target.value; actualizarEscena(true); });
+  const chip = document.getElementById('chip-avisos');
+  if (chip) chip.onclick = () => { document.getElementById('barra').classList.remove('colapsada'); document.getElementById('avisos').scrollIntoView({ behavior: 'smooth' }); setTimeout(() => window.dispatchEvent(new Event('resize')), 250); };
+}
+
+// Pinta la leyenda con casillas para filtrar categorías; el título es el encabezado de la columna 2.
+function renderLeyenda() {
+  const c = document.getElementById('leyenda');
+  if (!M) { c.innerHTML = '<span class="nada">Carga los archivos para ver las categorías.</span>'; return; }
+  document.getElementById('leyenda-titulo').textContent = state.nodos.cabecera[1] || 'Categoría';
+  c.innerHTML = M.cats.map(cat => {
+    const n = M.nodes.filter(x => x.cat === cat).length, off = state.ocultas.has(cat);
+    return `<label class="fila${off ? ' apagada' : ''}"><input type="checkbox" data-cat="${esc(cat)}"${off ? '' : ' checked'}><span class="punto" style="background:${M.colores[cat]}"></span><span class="nom">${esc(cat)}</span><span class="cuenta">${n}</span></label>`;
+  }).join('');
+  c.querySelectorAll('input').forEach(i => i.onchange = () => {
+    if (i.checked) state.ocultas.delete(i.dataset.cat); else state.ocultas.add(i.dataset.cat);
+    if (state.hubCat && state.ocultas.has(state.hubCat)) state.hubCat = M.cats.find(x => !state.ocultas.has(x)) || state.hubCat;
+    if (state.ocultas.has(state.bipA)) state.bipA = M.cats.find(x => !state.ocultas.has(x)) || state.bipA;
+    renderLeyenda(); renderModoBarra(); actualizarEscena(true);
+  });
+  const fa = document.getElementById('fila-aislados');
+  fa.style.display = 'flex';
+  document.getElementById('n-aislados').textContent = `(${M.sinConexion})`;
+}
+
+// Pinta el panel Capas con una casilla por elemento visual.
+function renderCapas() {
+  const c = document.getElementById('capas');
+  c.innerHTML = CAPAS_INICIALES.map(([id, nom]) => `<label class="chk"><input type="checkbox" data-capa="${id}"${state.capas[id] ? ' checked' : ''}><span>${nom}</span></label>`).join('');
+  c.querySelectorAll('input').forEach(i => i.onchange = () => { state.capas[i.dataset.capa] = i.checked; state.hover = null; ocultarTip(); state.sucio = true; });
+}
+
+// Pinta los avisos de lectura (filas omitidas, nombres sin nodo, nodos sin conexión, etc.).
+function renderAvisos() {
+  const c = document.getElementById('avisos');
+  if (!M) { c.innerHTML = '<span class="nada">Sin avisos.</span>'; return; }
+  const lista = M.avisos.slice();
+  if (M.sinConexion) lista.push({ t: state.mostrarAislados ? 'info' : 'warn', x: `${M.sinConexion} nodo(s) sin ninguna conexión ${state.mostrarAislados ? 'se muestran' : 'están ocultos'}`, d: 'Usa la casilla de la leyenda para mostrarlos.' });
+  c.innerHTML = lista.length ? lista.map(a => `<div class="aviso ${a.t === 'info' ? 'info' : ''}"><b>${esc(a.x)}</b>${a.d ? `<span class="det">${esc(a.d)}</span>` : ''}</div>`).join('') : '<span class="nada">Sin avisos.</span>';
+}
+
+// Pinta un resumen de lo que se ve ahora.
+function renderResumen() {
+  const c = document.getElementById('resumen');
+  if (!M) { c.textContent = '—'; return; }
+  const e = state.escena;
+  c.innerHTML = `Nodos en el modelo: <b>${M.nodes.length}</b><br>Conexiones válidas: <b>${M.links.length}</b><br>En pantalla: <b>${e ? e.insts.length : 0}</b> nodos, <b>${e ? e.links.length : 0}</b> conexiones` +
+    (M.hayPesoL ? `<br>Grosor = peso${M.unidad ? ' (' + esc(M.unidad) + ')' : ''}` : '') + `<br>Tamaño = ${M.hayPesoNodo ? 'peso del nodo' : 'número de conexiones'}`;
+}
+
+// Muestra qué archivos están cargados y el mensaje inicial.
+function renderEstadoArchivos() {
+  const n = state.nodos, l = state.enlaces;
+  document.getElementById('estado-archivos').innerHTML = `${n ? '<b>✓</b> ' + esc(n.archivo) : 'nodos: —'} &nbsp; ${l ? '<b>✓</b> ' + esc(l.archivo) : 'conexiones: —'} &nbsp; ${state.coords ? '<b>✓</b> ' + esc(state.coords.archivo) : 'coordenadas: —'}`;
+  document.getElementById('vacio-estado').innerHTML = `${n ? '✓' : '○'} Nodos ${n ? '— ' + esc(n.archivo) : '(pendiente)'}<br>${l ? '✓' : '○'} Conexiones ${l ? '— ' + esc(l.archivo) : '(pendiente)'}`;
+  document.getElementById('vacio').style.display = M ? 'none' : 'flex';
+}
+
+// Interpreta el CSV de coordenadas (columnas por posición: nodo, latitud, longitud) y lo guarda.
+function guardarCoordenadas(csv, archivo) {
+  const exactas = new Map(), aprox = new Map();
+  for (const f of csv.filas) {
+    const [nombre, la, lo] = f.c;
+    const lat = leerNumero(la), lon = leerNumero(lo);
+    if (!nombre || lat == null || lon == null || Math.abs(lat) > 85 || Math.abs(lon) > 180) continue;
+    const c = { lat, lon };
+    exactas.set(nombre, c); aprox.set(normalizar(nombre), c);
+  }
+  if (!exactas.size) throw new Error('El archivo no tiene filas con nodo, latitud y longitud válidas.');
+  state.coords = { archivo, exactas, aprox };
+}
+
+// Redibuja lo que depende de las coordenadas.
+function alCambiarCoordenadas() {
+  renderEstadoArchivos(); renderModoBarra();
+  if (state.modo === 'geo') actualizarEscena(true);
+}
+
+// Lee un CSV elegido por el usuario y reconstruye todo cuando ya están los dos.
+async function alCargarArchivo(tipo, file) {
+  if (!file) return;
+  try {
+    const r = parsearCSV(await leerTextoArchivo(file));
+    r.archivo = file.name;
+    if (tipo === 'coords') { guardarCoordenadas(r, file.name); alCambiarCoordenadas(); return; }
+    state[tipo] = r;
+  } catch (err) {
+    alert('No se pudo leer el archivo: ' + (err.message || err)); return;
+  }
+  reconstruir();
+}
+
+// Al publicar el sitio (http/https), carga automáticamente los CSV de la carpeta data/.
+// AJUSTABLE: rutas de los CSV que se cargan al abrir la página (vacío = no cargar nada).
+const CSV_PREDETERMINADOS = { nodos: 'data/Points.csv', enlaces: 'data/Links.csv' };
+const CSV_COORDENADAS = 'data/Coordenadas.csv';
+// Las coordenadas son opcionales: si fallan, los demás modos funcionan igual.
+async function cargarCoordenadasPredeterminadas() {
+  if (!/^https?:$/.test(location.protocol) || !CSV_COORDENADAS) return;
+  try {
+    const resp = await fetch(CSV_COORDENADAS, { cache: 'no-cache' });
+    if (!resp.ok) return;
+    const texto = await resp.text();
+    if (state.coords) return;                        // el usuario ya cargó las suyas
+    guardarCoordenadas(parsearCSV(texto), CSV_COORDENADAS.split('/').pop());
+    alCambiarCoordenadas();
+  } catch (err) {
+    console.warn('No se cargaron las coordenadas predeterminadas:', err);
+  }
+}
+async function cargarDatosPredeterminados() {
+  if (!/^https?:$/.test(location.protocol)) return;   // abierto con doble clic (file://): se usan los botones
+  try {
+    for (const tipo of ['nodos', 'enlaces']) {
+      const ruta = CSV_PREDETERMINADOS[tipo];
+      if (!ruta) return;
+      const resp = await fetch(ruta, { cache: 'no-cache' });
+      if (!resp.ok) return;
+      const r = parsearCSV(await resp.text());
+      r.archivo = ruta.split('/').pop();
+      state[tipo] = r;
+    }
+    reconstruir();
+  } catch (err) {
+    console.warn('No se cargaron los CSV predeterminados:', err);
+  }
+}
+
+// Reconstruye modelo, escalas y panel completo con los datos cargados.
+function reconstruir() {
+  renderEstadoArchivos();
+  if (!(state.nodos && state.enlaces)) return;
+  try {
+    M = construirModelo();
+  } catch (err) {
+    console.error(err); alert('Error al construir el modelo: ' + err.message); return;
+  }
+  crearEscalas();
+  state.ocultas.clear(); state.sel = null; state.mostrarAislados = false;
+  document.getElementById('chk-aislados').checked = false;
+  const porCat = c => M.nodes.filter(n => n.cat === c).length;
+  state.hubCat = M.cats[0];
+  const pref = BIPARTITO_PREDETERMINADO;
+  state.bipA = M.cats.includes(pref.izquierda) ? pref.izquierda : M.cats.slice().sort((a, b) => porCat(b) - porCat(a))[0];
+  state.bipB = (pref.derecha !== state.bipA && M.cats.includes(pref.derecha)) ? pref.derecha : (M.cats.find(c => c !== state.bipA) || '*');
+  renderEstadoArchivos(); renderLeyenda(); renderAvisos(); renderModoBarra(); renderPestanas();
+  actualizarEscena(true);
+}
+
+// Conecta botones, casillas y el panel colapsable.
+function conectarInterfaz() {
+  document.getElementById('in-nodos').onchange = ev => { alCargarArchivo('nodos', ev.target.files[0]); ev.target.value = ''; };
+  document.getElementById('in-enlaces').onchange = ev => { alCargarArchivo('enlaces', ev.target.files[0]); ev.target.value = ''; };
+  const redim = () => { setTimeout(() => window.dispatchEvent(new Event('resize')), 230); };
+  document.getElementById('in-coords').onchange = ev => { alCargarArchivo('coords', ev.target.files[0]); ev.target.value = ''; };
+  document.getElementById('btn-panel').onclick = () => { document.getElementById('barra').classList.toggle('colapsada'); redim(); };
+  document.getElementById('chk-aislados').onchange = ev => { state.mostrarAislados = ev.target.checked; renderAvisos(); actualizarEscena(true); };
+  document.getElementById('z-mas').onclick = () => state.zoomSel && state.zoomSel.transition().duration(200).call(state.zoomB.scaleBy, 1.4);
+  document.getElementById('z-menos').onclick = () => state.zoomSel && state.zoomSel.transition().duration(200).call(state.zoomB.scaleBy, 1 / 1.4);
+  document.getElementById('z-ajustar').onclick = () => ajustarVista(true);
+  renderCapas(); renderPestanas(); renderEstadoArchivos();
+}
+
+// ============================================================
+// 9 INICIO
+// ============================================================
+// Crea el lienzo de p5 en modo instancia y arranca la interfaz; si faltan las librerías, lo avisa.
+function iniciar() {
+  conectarInterfaz();
+  if (typeof d3 === 'undefined' || typeof p5 === 'undefined') {
+    document.querySelector('#vacio .tarjeta').insertAdjacentHTML('beforeend', '<p style="color:#8a2a14"><b>No se pudieron cargar D3 o p5.js.</b> Se necesita conexión a internet la primera vez para descargarlas desde cdnjs.</p>');
+    return;
+  }
+  const host = document.getElementById('lienzo');
+  new p5(function (p) {
+    p.setup = function () {
+      const { w, h } = tamLienzo();
+      const c = p.createCanvas(w, h);
+      p.pixelDensity(Math.min(window.devicePixelRatio || 1, 2));
+      p.frameRate(30);
+      state.p = p;
+      conectarInteraccion(c.elt);
+      state.listo = true;
+      let pendiente = null;
+      new ResizeObserver(() => {
+        clearTimeout(pendiente);
+        pendiente = setTimeout(() => {
+          const t = tamLienzo();
+          p.resizeCanvas(t.w, t.h);
+          state.sucio = true;
+          actualizarEscena(true);
+        }, 120);
+      }).observe(host);
+      if (M) actualizarEscena(true);
+    };
+    p.draw = function () { dibujarFrame(p); };
+  }, host);
+  cargarDatosPredeterminados();
+  cargarCoordenadasPredeterminadas();
+}
+iniciar();
+</script>
+</body>
+</html>

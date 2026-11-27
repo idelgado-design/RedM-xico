@@ -1,0 +1,296 @@
+﻿,,
+Ciudad de México,Querétaro,215 km
+Querétaro,San Luis Potosí,205 km
+San Luis Potosí,Monterrey (C),510 km
+San Luis Potosí,Zacatecas,190 km
+Querétaro,Celaya,50 km
+Celaya,León,110 km
+León,Aguascalientes,125 km
+Aguascalientes,Zacatecas,115 km
+Querétaro,Morelia (C),190 km
+Morelia (C),Guadalajara (C),290 km
+Guadalajara (C),Tepic (C),205 km
+Ciudad de México (C),Puebla,130 km
+Puebla,Veracruz,275 km
+Ciudad de México (C),Toluca (C),65 km
+Toluca (C),Morelia (C),200 km
+Mexicali (C),La Paz (C),1700 km
+Ciudad de México,Tlaxcala,121 km
+Aguascalientes,Zacatecas,118 km
+Veracruz,Puebla,281 km
+Veracruz,Querétaro,560 km
+Veracruz,San Luis Potosí,650 km
+Veracruz,Oaxaca,450 km
+Veracruz,Tabasco,470 km
+Veracruz,Chiapas,690 km
+Veracruz,Hidalgo,430 km
+Campeche,Yucatan,180 km
+Campeche,Quintana Roo,420 km
+Campeche,Tabasco,380 km
+Sonora,Chihuahua,700 km
+Sonora,Sinaloa,700 km
+Sonora,Baja California,200 km
+Yucatán,Quintana Roo,310 km
+Yucatán,Campeche,180km
+Durango,Nayarit,450 km
+Durango,Sinaloa,470 km
+Durango,Chihuahua,690 km
+Durango,Coahuila,520 km
+Durango,Zacatecas,290 km
+Tamaulipas,Nuevo León,290 km
+Tamaulipas,San Luis Potosí,330 km
+Tamaulipas,Veracruz,680 km
+Guanajuato,Querétaro,150 km
+Guanajuato,Michoacán,180 km
+Guanajuato,Jalisco,290 km
+Guanajuato,San Luis Potosí,190 km
+Guanajuato,Zacatecas,310 km
+Michoacán,Guerrero,310 km
+Michoacán,Jalisco,290 km
+Michoacán,Colima,310 km
+Baja California Sur,Baja California,1480 km
+Morelos,Edo Mex,140 km
+Morelos,Guerrero,200 km
+Morelos,Puebla,160 km
+Morelos,Ciudad de México,90 km
+Chiapas,Tabasco,250 km
+Chiapas,Veracruz,690 km
+Chiapas,Oaxaca,540 km
+Edo Mex,Querétaro,190 km
+Edo Mex,Tlaxcala,180 km
+Edo Mex,Puebla,190 km
+Edo Mex,Michoacán,240 km
+Edo Mex,Guerrero,290 km
+Edo Mex,Hidalgo,170 km
+Nuevo León,Zacatecas,460 km
+Nuevo León,San Luis Potosí,510 km
+Nuevo León,Coahuila,90 km
+Nuevo León,Tamaulipas,290 km
+Nayarit,Jalisco,210 km
+Nayarit,Sinaloa,500 km
+Nayarit,Durango,450 km
+Nayarit,Zacatecas,500 km
+Tlaxcala,Puebla,40 km
+Tlaxcala,Hidalgo,130 km
+Tlaxcala,Edo Mex,180 km
+Aguascalientes,Jalisco,230 km
+Aguascalientes,Zacatecas,120 km
+Colima,Jalisco,190 km
+Colima,Michoacán,310 km
+Oaxaca,Guerrero,620 km
+Oaxaca,Chiapas,540 km
+Oaxaca,Veracruz,450 km
+Oaxaca,Puebla,340 km
+Coahuila,Chihuahua,730 km
+Coahuila,Durango,520 km
+Coahuila,Zacatecas,370 km
+Coahuila,Nuevo León,90 km
+Coahuila,San Luis Potosí,450 km
+Aguascalientes (C),Aguascalientes,50
+Mexicali (C),Baja California,50
+La Paz (C),Baja California Sur,50
+Campeche (C),Campeche,50
+Tuxtla Gutiérrez (C),Chiapas,50
+Chihuahua (C),Chihuahua,50
+Ciudad de México (C),Ciudad de México,50
+Saltillo (C),Coahuila,50
+Colima (C),Colima,50
+Durango (C),Durango,50
+Guanajuato (C),Guanajuato,50
+Chilpancingo (C),Guerrero,50
+Pachuca (C),Hidalgo,50
+Guadalajara (C),Jalisco,50
+Toluca (C),Edo Mex,50
+Morelia (C),Michoacán,50
+Cuernavaca (C),Morelos,50
+Tepic (C),Nayarit,50
+Monterrey (C),Nuevo León,50
+Oaxaca (C),Oaxaca,50
+Puebla (C),Puebla,50
+Querétaro (C),Querétaro,50
+Chetumal (C),Quintana Roo,50
+San Luis Potosí (C),San Luis Potosí,50
+Culiacán (C),Sinaloa,50
+Hermosillo (C),Sonora,50
+Villahermosa (C),Tabasco,50
+Ciudad Victoria (C),Tamaulipas,50
+Tlaxcala (C),Tlaxcala,50
+Xalapa (C),Veracruz,50
+Merida (C),Yucatán,50
+Zacatecas (C),Zacatecas,50
+Cavillo,Aguascalientes,50
+Pabellón de Hidalgo,Aguascalientes,50
+Real de Asientos,Aguascalientes,50
+San José de Gracia,Aguascalientes,50
+Tecate,Baja California,50
+Loreto,Baja California Sur,50
+Santa Rosalía,Baja California Sur,50
+Todos Santos,Baja California Sur,50
+Candelaria,Campeche,50
+Isla Aguada,Campeche,50
+Palizada,Campeche,50
+Chiapa de Corzo,Chiapas,50
+Comitán de Domíngez,Chiapas,50
+Copainalá,Chiapas,50
+Ocozocoautla,Chiapas,50
+Palenque,Chiapas,50
+San Cristóbal de las Casas,Chiapas,50
+Batopilas,Chihuahua,50
+Casas Grandes,Chihuahua,50
+Creel,Chihuahua,50
+Guachochi,Chihuahua,50
+Hidalgo del Parral,Chihuahua,50
+Arteaga,Coahuila,50
+Candela,Coahuila,50
+Cuatro Ciénegas,Coahuila,50
+Central Cepeda,Coahuila,50
+Guerrero,Coahuila,50
+Múzquiz,Coahuila,50
+Parras de la Fuente,Coahuila,50
+Viesca,Coahuila,50
+Comala,Colima,50
+Mapimí,Durango,50
+Nombre de Dios,Durango,50
+Aculco,Edo Mex,50
+El Oro,Edo Mex,50
+Ixtapan,Edo Mex,50
+Jilotepec,Edo Mex,50
+Malinalco,Edo Mex,50
+Metepec,Edo Mex,50
+Otumba,Edo Mex,50
+San Juan Teotihucan,Edo Mex,50
+San Martín de las Piramides,Edo Mex,50
+Tepozotlán,Edo Mex,50
+Tonatico,Edo Mex,50
+Valle de Bravo,Edo Mex,50
+Villa del Carbón,Edo Mex,50
+Comonfort,Guanajuato,50
+Dolores,Guanajuato,50
+Hidalgo,Guanajuato,50
+Jalpa de Cánovas,Guanajuato,50
+Mineral de Pozos,Guanajuato,50
+Salvatierra,Guanajuato,50
+Yuriria,Guanajuato,50
+Ixcateopan,Guerrero,50
+Taxco de Alarcón,Guerrero,50
+Zihuatanejo,Guerrero,50
+Acaxochitlán,Hidalgo,50
+Huasca de Ocampo,Hidalgo,50
+Huichapan,Hidalgo,50
+Meztitlán,Hidalgo,50
+Mineral del Chico,Hidalgo,50
+Real del Monte,Hidalgo,50
+Tecozautla,Hidalgo,50
+Zempoala,Hidalgo,50
+Zimapán,Hidalgo,50
+Ajijic,Jalisco,50
+Cocula,Jalisco,50
+Lagos de Moreno,Jalisco,50
+Mascota,Jalisco,50
+Mazamitla,Jalisco,50
+San Sebastián del Oeste,Jalisco,50
+Sayula,Jalisco,50
+Talpa de Allende,Jalisco,50
+Tapalpa,Jalisco,50
+Temacapulín,Jalisco,50
+Tequila,Jalisco,50
+Tlaquepaque,Jalisco,50
+Angangueo,Michoacán,50
+Cotija,Michoacán,50
+Cuitzeo del Porvenir,Michoacán,50
+Jiquilpan,Michoacán,50
+Paracho,Michoacán,50
+Pátzcuaro,Michoacán,50
+Santa Clara del Cobre,Michoacán,50
+Tacámbaro,Michoacán,50
+Tzintzuntzan,Michoacán,50
+Tepoztlán,Morelos,50
+Tlaltizapán de Zapata,Morelos,50
+Tlayacapan,Morelos,50
+Xochitepec,Morelos,50
+Ahuacatlán,Nayarit,50
+Amatlán de Cañas · Compostela,Nayarit,50
+Ixtlán del Río,Nayarit,50
+Jala,Nayarit,50
+Mexcaltitán,Nayarit,50
+Puerto Balleto,Nayarit,50
+San Blas,Nayarit,50
+Sayulita,Nayarit,50
+Bustamante,Nuevo León,50
+General Terán,Nuevo León,50
+General Zaragoz,Nuevo León,50
+Linares,Nuevo León,50
+Santiago,Nuevo León,50
+Capulálpam de Méndez,Oaxaca,50
+Huautla de Jiménez,Oaxaca,50
+San Pablo Villa de Mitla,Oaxaca,50
+San Pedro y San Pablo Teposcolula,Oaxaca,50
+Santa Catarina Juquila,Oaxaca,50
+Atlixco,Puebla,50
+Chignahuapan,Puebla,50
+Cholula,Puebla,50
+Cuetzalan del Progreso,Puebla,50
+Huauchinango,Puebla,50
+Huejotzingo,Puebla,50
+Pahuatlán,Puebla,50
+Tetela de Ocampo,Puebla,50
+Teziutlán,Puebla,50
+Tlatlauquitepec,Puebla,50
+Xicotepec,Puebla,50
+Zacatlán,Puebla,50
+Amealco de Bonfil,Querétaro,50
+Bernal,Querétaro,50
+Cadereyta de Montes,Querétaro,50
+Jalpan de Serra,Querétaro,50
+Pinal de Amoles,Querétaro,50
+San Joaquín,Querétaro,50
+Tequisquiapan,Querétaro,50
+Bacalar,Quintana Roo,50
+Cozumel,Quintana Roo,50
+Isla Mujeres,Quintana Roo,50
+Tulum,Quintana Roo,50
+Aquismón,San Luis Potosí,50
+Ciudad del Maíz,San Luis Potosí,50
+Real de Catorce,San Luis Potosí,50
+Santa María del Río,San Luis Potosí,50
+Tierra Nueva,San Luis Potosí,50
+Xilitla,San Luis Potosí,50
+Cosalá,Sinaloa,50
+El Fuerte,Sinaloa,50
+El Rosario,Sinaloa,50
+Mocorito,Sinaloa,50
+San Ignacio,Sinaloa,50
+Álamos,Sonora,50
+Magdalena de Kino,Sonora,50
+San Carlos,Sonora,50
+Ures,Sonora,50
+Frontera,Tabasco,50
+Tapijulapa,Tabasco,50
+Teapa,Tabasco,50
+Mier,Tamaulipas,50
+Tula,Tamaulipas,50
+Huamantla,Tlaxcala,50
+Ixtenco,Tlaxcala,50
+Tlaxco,Tlaxcala,50
+Coatepec,Veracruz,50
+Córdoba,Veracruz,50
+Coscomatepec,Veracruz,50
+Naolinco de Victoria,Veracruz,50
+Orizaba,Veracruz,50
+Papantla,Veracruz,50
+Xico,Veracruz,50
+Zozocolco de Hidalgo,Veracruz,50
+Espita,Yucatán,50
+Izamal,Yucatán,50
+Maní,Yucatán,50
+Motul,Yucatán,50
+Sisal,Yucatán,50
+Tekax,Yucatán,50
+Valladolid,Yucatán,50
+Guadalupe,Zacatecas,50
+Jerez de García Salinas,Zacatecas,50
+Nochistlán de Mejía ·,Zacatecas,50
+Pinos,Zacatecas,50
+Sombrerete,Zacatecas,50
+Teúl de González Ortega,Zacatecas,50
+Villanueva,Zacatecas,50
